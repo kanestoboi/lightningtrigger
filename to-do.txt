@@ -2,3 +2,4 @@
 - make footprint for microphone
 - edit footprint for switch to have outline of switch
 - check tot see if 2.5mm jacks are too close to each other
+- move footprints to a global library
