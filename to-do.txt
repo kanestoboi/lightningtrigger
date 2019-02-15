@@ -1,5 +1,6 @@
-- position 2.5mm jack on board edge
 - make footprint for microphone
-- edit footprint for switch to have outline of switch
-- check tot see if 2.5mm jacks are too close to each other
+- edit footprint for 5-way switch to have outline of switch
 - move footprints to a global library
+- find smaller 16MHz crystal
+- change schematic symbol for analog transistor
+- Redraw outline of board and cut on CNC
