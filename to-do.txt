@@ -2,5 +2,7 @@
 - edit footprint for 5-way switch to have outline of switch
 - move footprints to a global library
 - find smaller 16MHz crystal
-- change schematic symbol for analog transistor
-- Redraw outline of board and cut on CNC
+- add battery level circuitry. Will likely need a voltage reference and voltage divider.
+- change lipo charger to send status to uC
+- add automatic power switching between usb and battery to allow for uC to display battery level when charging
+- add bluetooth functionality
