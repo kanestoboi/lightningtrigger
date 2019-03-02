@@ -22,11 +22,17 @@ volatile bool trigger = false;
 int threshold = 0;
 int sensitivity = 0;
 int soundThreshold = 105;       // Threshold for sound to trigger camera
-int lightningThreshold = 20;   // Threshold for light to trigger camera
+int lightningThreshold = 80;   // Threshold for light to trigger camera
 int numberOfTriggers = 0;
 
+// masks used
 int triggerMask = 0b00000001;
-
+int switchesMask = 0b00000100;
+int downMask = 0b00000100;
+int centerMask = 0b00001000;
+int leftMask = 0b00010000;
+int upMask = 0b00100000;
+int rightMask = 0b01000000;
 
 // Value to store analog result
 volatile int analogVal;
@@ -36,7 +42,7 @@ void setup() {
   Wire.begin();
 
   DDRB = DDRB | 0b00001111; // set focus and shutter pins to be outputs
-  DDRD = DDRD | 0b00000000; // set the 5-way switch pins to be inputs
+  DDRD = DDRD | switchesMask; // set the 5-way switch pins to be inputs
 
   ADCSetup(); // Setup registers for ADC
 
@@ -57,6 +63,10 @@ void setup() {
 }
 
 void loop() {
+
+
+  getKeyPress();
+    
   
 
   
@@ -177,4 +187,38 @@ void updateDisplay() {
   display.setCursor(0,10);
   display.println(numberOfTriggers);
   display.display();
+}
+
+char getKeyPress() {
+
+  if (PIND != 0b00000000)
+  _delay_ms(50);
+  int dir = PIND & switchesMask;
+
+  while((PIND & switchesMask) != 0);
+  
+  if (dir == downMask) {
+    Serial.println("Down");
+    return "d";
+  }
+  else if (dir == centerMask) {
+    Serial.println("Center");
+    return "c";
+  }
+  else if (dir == leftMask) {
+    Serial.println("Left");
+    return "l";
+  }
+  else if (dir == upMask) {
+    Serial.println("Up");
+    return "u";
+  }
+  else if (dir == rightMask) {
+    Serial.println("Right");
+    return "r";
+  }
+
+  return 0;
+  
+  
 }
