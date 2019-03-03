@@ -6,6 +6,8 @@ byte READPIN = A0;
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <StateMachine.h>
+
 
 #define OLED_RESET 4
 
@@ -15,6 +17,9 @@ byte READPIN = A0;
 // create LCD object
 Adafruit_SSD1306 display(OLED_RESET);
 
+// Create state machine object
+StateMachine machine = StateMachine();
+
 
 long lastMillis = millis();
 
@@ -22,12 +27,12 @@ volatile bool trigger = false;
 int threshold = 0;
 int sensitivity = 0;
 int soundThreshold = 105;       // Threshold for sound to trigger camera
-int lightningThreshold = 80;   // Threshold for light to trigger camera
+int lightningThreshold = 100;   // Threshold for light to trigger camera
 int numberOfTriggers = 0;
 
 // masks used
 int triggerMask = 0b00000001;
-int switchesMask = 0b00000100;
+int switchesMask = 0b01111100;
 int downMask = 0b00000100;
 int centerMask = 0b00001000;
 int leftMask = 0b00010000;
@@ -37,26 +42,152 @@ int rightMask = 0b01000000;
 // Value to store analog result
 volatile int analogVal;
 
+// Define states for state machine
+State* S0 = machine.addState(&lightningMode);
+State* S1 = machine.addState(&soundMode);
+/*State* S3 = machine.addState(&state3);
+State* S4 = machine.addState(&state4);
+State* S5 = machine.addState(&state5);
+*/
 void setup() {
   Serial.begin(9600);
   Wire.begin();
 
-  DDRB = DDRB | 0b00001111; // set focus and shutter pins to be outputs
-  DDRD = DDRD | switchesMask; // set the 5-way switch pins to be inputs
-
   ADCSetup(); // Setup registers for ADC
+  
 
   setSoundSensitivity(50);     // sets default sensitivity 
   setLightningSensitivity(50); // sets default sensitivity
 
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x32)
   display.clearDisplay();   // clear the adafruit splash screen
 
+  /**********************************
+   * THERE IS A BUG IN THE DISPLAY.BEGIN FUNCTION CAUSING PD4 TO BE SET HIGH
+   * THE WORK AROUND BELOW SETS ALL PINS LOW BEFORE SETTING THEM AS INPUTS
+   **********************************/
+  DDRB = DDRB | 0b00001111; // set focus and shutter pins to be outputs
+  DDRD = 0b00000000;
+  PORTD = 0b00000000;
+  DDRD = DDRD | switchesMask; // set the 5-way switch pins to be inputs
+  
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
   display.println("Lightning Trigger");
+  display.setCursor(0,20);
+  display.print("Threshold: ");
+  display.println(lightningThreshold);
   display.display();
+
+  setupLightningMode();
+
+
+
+   /*************************
+    * Lightning Trigger State Transitions
+    */
+  S0->addTransition([](){
+    
+    if (getKeyPress() == 'd'){
+      
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0,0);
+      display.println("Sound Trigger");
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(soundThreshold);
+      display.display();
+
+      setupSoundMode();
+      
+      return true;
+    }
+    return false;
+  },S1);
+
+  S0->addTransition([](){
+    if (getKeyPress() == 'r'){
+      if (lightningThreshold < 1022)
+        lightningThreshold++;
+      display.fillRect(0, 20, 128, 30, BLACK);
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(lightningThreshold);
+      display.display();
+      return true;
+    }
+    return false;
+  },S0);
+
+  S0->addTransition([](){
+    if (getKeyPress() == 'l'){
+      if (lightningThreshold > 0)
+        lightningThreshold--;
+        
+      display.fillRect(0, 20, 128, 30, BLACK);
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(lightningThreshold);
+      display.display();
+      return true;
+    }
+    return false;
+  },S0);
+
+  /**********************
+   * Sound Trigger State Transitions
+   */
+  S1->addTransition([](){
+    if (getKeyPress() == 'u'){
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0,0);
+      display.println("Lightning Trigger");
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(lightningThreshold);
+      display.display();
+
+      setupLightningMode();
+      
+      return true;
+    }
+    return false;
+  },S0);
+  
+  S1->addTransition([](){
+    if (getKeyPress() == 'r'){
+      if (soundThreshold < 1022)
+        soundThreshold++;
+      display.fillRect(0, 20, 128, 30, BLACK);
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(soundThreshold);
+      display.display();
+      return true;
+    }
+    return false;
+  },S1);
+
+  S1->addTransition([](){
+    if (getKeyPress() == 'l'){
+      if (soundThreshold > 0)
+        soundThreshold--;
+        
+      display.fillRect(0, 20, 128, 30, BLACK);
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(soundThreshold);
+      display.display();
+      return true;
+    }
+    return false;
+  },S1);
+
 
   //delay(4000);
   
@@ -64,14 +195,13 @@ void setup() {
 
 void loop() {
 
+  machine.run();
+  
+  //getKeyPress();
 
-  getKeyPress();
-    
+  
   
 
-  
-
-  //lightingMode();
   //setupLightningMode();
   //runTrigger();
 
@@ -149,16 +279,20 @@ void runTrigger() {
   sei();  // Enable global interrupts
 
   display.clearDisplay();
+  display.display();
+  _delay_ms(1000);
   display.setCursor(0,0);
   display.println("Waiting for trigger");
   display.display();
+
+  
   
   ADCSRA |=B01000000; // Set ADSC in ADCSRA (0x7A) to start the ADC conversion
 
   while(true) {
     
     if (trigger == true) {
-
+      
       triggerCamera();
       updateDisplay();
 
@@ -195,30 +329,44 @@ char getKeyPress() {
   _delay_ms(50);
   int dir = PIND & switchesMask;
 
-  while((PIND & switchesMask) != 0);
+
+  //while((PIND & switchesMask) != 0);
+
+  _delay_ms(10);
   
   if (dir == downMask) {
     Serial.println("Down");
-    return "d";
+    return 'd';
   }
   else if (dir == centerMask) {
     Serial.println("Center");
-    return "c";
+    return 'c';
   }
   else if (dir == leftMask) {
     Serial.println("Left");
-    return "l";
+    return 'l';
   }
   else if (dir == upMask) {
     Serial.println("Up");
-    return "u";
+    return 'u';
   }
   else if (dir == rightMask) {
     Serial.println("Right");
-    return "r";
+    return 'r';
   }
-
   return 0;
-  
-  
+}
+
+void lightningMode() {
+  Serial.println("Lightning Mode");
+  if (getKeyPress() == 'c')
+    runTrigger();
+}
+
+
+
+void soundMode() {
+  Serial.println(soundThreshold);
+  if (getKeyPress() == 'c')
+    runTrigger();
 }
