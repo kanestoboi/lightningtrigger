@@ -1,0 +1,45 @@
+Component,Description,Part,References,Value,Footprint,Quantity Per PCB,Datasheet,Manufacturer P/N,Supplier P/N,Supplier,Category,Status,Family,MPN,Digi-Key_PN,DK_Datasheet_Link,DK_Detail_Page,Manufacturer
+1,Unpolarized capacitor,C,C1 C5 C6 C7 C8 C9,100nF,C_0805,6,,0805B104K250,C128353,LCSC,,,,,,,,
+2,Unpolarized capacitor,C,C4 C10,1nF,C_0805,2,,N/A,N/A,N/A,,,,,,,,
+3,Unpolarized capacitor,C,C2 C3,22pF,C_0805,2,,N/A,N/A,N/A,,,,,,,,
+4,Light emitting diode,LED,D1,Green LED,LED_0805,1,,ORH-G35A,C205442,LCSC,,,,,,,,
+5,Light emitting diode,LED,D2,Red LED,LED_0805,1,,ORH-R35A,C205444,LCSC,,,,,,,,
+6,"Generic connector, single row, 01x01",Conn_01x01,J7 J8,Conn_01x01,Pin_Header_Straight_1x01_Pitch2.54mm,2,,,,,,,,,,,,
+7,"Generic connector, single row, 01x02",Conn_01x02,J1,Conn_01x02,PinHeader_1x02_P1.00mm_Vertical,1,~,,,,,,,,,,,
+8,"Generic connector, single row, 01x04",Conn_01x04,J3,Conn_01x04,Pin_Header_Straight_1x04_Pitch2.54mm,1,,,,,,,,,,,,
+9,"Generic connector, double row, 02x03, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers)",Conn_02x03_Odd_Even,J2,Conn_02x03_Odd_Even,Pin_Header_Straight_2x03_Pitch2.54mm,1,,,,,,,,,,,,
+10,2.5 mm Audio Jack Connector for PJ-237-6A,PJ-237-6A,J4 J5,PJ-237-6A,PJ-237-6A,2,https://datasheet.lcsc.com/szlcsc/Korean-Hroparts-Elec-PJ-237-6A_C128992.pdf,PJ-237-6A,,,,,,,,,,
+11,USB mini/micro connector,USB_OTG,J6,USB_OTG,USB_Micro_C77238,1,,N/A,C77238,LCSC,,,,,,,,
+12,Ferrite bead,Ferrite_Bead,L1,Ferrite_Bead,C_0805,1,,MH2029-300Y,MH2029-300YCT-ND,Digi-key,,,,,,,,
+13,Microphone,Microphone,MK1,Microphone,Pin_Header_Angled_1x02_Pitch2.54mm,1,,N/A,N/A,N/A,,,,,,,,
+14,TRANS NPN 65V 0.1A SOT23,BC846B_215-dk_Transistors-Bipolar-BJT-Single,Q2,BC846B_215,SOT-23-3,1,https://assets.nexperia.com/documents/data-sheet/BC846_SER.pdf,,1727-2920-1-ND,Digikey,Discrete Semiconductor Products,Active,Transistors - Bipolar (BJT) - Single,"BC846B,215",1727-2920-1-ND,https://assets.nexperia.com/documents/data-sheet/BC846_SER.pdf,"/product-detail/en/nexperia-usa-inc/BC846B,215/1727-2920-1-ND/763459",Nexperia USA Inc.
+15,"NPN phototransistor, collector/emitter",Q_Photo_NPN,Q1,Q_Photo_NPN,LED_D3.0mm_Horizontal_O1.27mm_Z2.0mm,1,,SFH 310-2/3,475-1443-ND,Digi-key,,,,,,,,
+16,Resistor,R,R1,10k,R_0805_2012Metric,1,,RMCF0805FT10K0,RMCF0805FT10K0CT-ND,Digikey,,,,,,,,
+17,Resistor,R,R2 R3 R4 R5 R6 R7 R9 R10 R11 R18 R19,150,R_0805_2012Metric,11,,RNCP0603FTD150R,RNCP0603FTD150RCT-ND,Digikey,,,,,,,,
+18,Resistor,R,R8,160k,R_0805_2012Metric,1,,ERJ-6ENF1603V,P160KCCT-ND,Digikey,,,,,,,,
+19,Resistor,R,R12 R13 R14 R15 R16 R17,1k,R_0805_2012Metric,6,,RS-05K1001FT,C115316,LCSC,,,,,,,,
+20,,K1-5203UA-01,S1,K1-5203UA-01,K1-5203UA-01,1,,K1-5203UA-01,C92594,LCSC,,,,,,,,
+21,"Switch, single pole double throw",SW_SPDT,SW1,SW_SPDT,JS102011SAQN,1,,JS102011SAQN,401-1999-1-ND,Digikey,,,,,,,,
+22,"TQFP32, 16k Flash, 1kB SRAM, 512B EEPROM",ATMEGA328P-AU,U3,ATMEGA328P-AU,TQFP-32_7x7mm_Pitch0.8mm,1,http://www.atmel.com/images/atmel-8271-8-bit-avr-microcontroller-atmega48a-48pa-88a-88pa-168a-168pa-328-328p_datasheet.pdf,,,,,,,,,,,
+23,,FS312F-G,U7,FS312F-G,SOT-23-6,1,,FS312F-G,C16581,LCSC,,,,,,,,
+24,,FS8205,U6,FS8205,SOT-23-6,1,,FS8205,C32254,LCSC,,,,,,,,
+25,,LTV-827S,U5 U9,LTV-827S,LTV-827S-TA1,2,,LTV-827S-TA1,160-2040-1-ND,Digi-key,,,,,,,,
+26,,MCP4532-Digital_Pots,U2 U10,MCP4532,8-MSOP,2,,MCP4532T-103E/MS,MCP4532T-103E/MSCT-ND,Digikey Digi-key,,,,,,,,
+27,"10 MHz, 850 µA Op Amps, SOT-23-5",MCP6001,U1,MCP6001,SOT-23-5,1,http://ww1.microchip.com/downloads/en/DeviceDoc/22141b.pdf,MCP6001T-I/OT,MCP6001T-I/OTCT-ND,Digi-key,,,,,,,,
+28,,TP4056,U8,TP4056,SOP-8,1,,TP4056,C16581,LCSC,,,,,,,,
+29,Two pin crystal,Crystal,Y1,Crystal,Crystal_HC18-U_Vertical,1,,N/A,N/A,N/A,,,,,,,,
+
+
+
+
+
+Component Groups:,29
+Component Count:,55
+Fitted Components:,55
+Number of PCBs:,1
+Total components:,55
+Schematic Version:,
+Schematic Date:,
+BoM Date:,15/02/2019 2:30:10 PM
+Schematic Source:,C:\Users\kanes\Documents\Projects\Lightning Trigger\Hardware\lightning trigger.sch
+KiCad Version:,Eeschema (5.0.2)-1
