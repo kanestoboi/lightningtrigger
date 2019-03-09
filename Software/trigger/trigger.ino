@@ -1,5 +1,3 @@
-byte READPIN = A0;
-
 // Include libraries for LCD
 #include <util/delay.h>
 #include <SPI.h>
@@ -8,30 +6,29 @@ byte READPIN = A0;
 #include <Adafruit_SSD1306.h>
 #include <StateMachine.h>
 
-
 #define OLED_RESET 4
 
-#define F_CPU 16000000UL  // 1 MHz
+#define F_CPU 16000000UL  // Define the microcontroller clock speed (16 MHz)
 
 
-// create LCD object
-Adafruit_SSD1306 display(OLED_RESET);
 
-// Create state machine object
-StateMachine machine = StateMachine();
+Adafruit_SSD1306 display(OLED_RESET);   // create LCD object
+StateMachine machine = StateMachine();  // Create state machine object
 
 
 long lastMillis = millis();
 
 volatile bool trigger = false;
-int threshold = 0;
+int threshold = 1000;
 int sensitivity = 0;
-int soundThreshold = 105;       // Threshold for sound to trigger camera
-int lightningThreshold = 100;   // Threshold for light to trigger camera
+int soundThreshold = 761;       // Threshold for sound to trigger camera
+int lightningThreshold = 1000;   // Threshold for light to trigger camera
 int numberOfTriggers = 0;
+volatile int output = 0;
+volatile int triggerFlag = 0;
 
 // masks used
-int triggerMask = 0b00000001;
+int triggerMask = 0b00000011;
 int switchesMask = 0b01111100;
 int downMask = 0b00000100;
 int centerMask = 0b00001000;
@@ -54,12 +51,11 @@ void setup() {
   Wire.begin();
 
   ADCSetup(); // Setup registers for ADC
-  
 
-  setSoundSensitivity(50);     // sets default sensitivity 
-  setLightningSensitivity(50); // sets default sensitivity
+  setSoundSensitivity(0);       // sets default sensitivity 
+  setLightningSensitivity(128); // sets default sensitivity
 
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x32)
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
   display.clearDisplay();   // clear the adafruit splash screen
 
   /**********************************
@@ -80,9 +76,7 @@ void setup() {
   display.println(lightningThreshold);
   display.display();
 
-  setupLightningMode();
-
-
+  setupLightningMode();   // lightning trigger is the default mode on start up
 
    /*************************
     * Lightning Trigger State Transitions
@@ -195,15 +189,14 @@ void setup() {
 
 void loop() {
 
-  machine.run();
+  //machine.run();
   
   //getKeyPress();
-
   
-  
-
-  //setupLightningMode();
-  //runTrigger();
+  setupLightningMode();
+  calibrateThreshold();
+  //setupSoundMode();
+  runTrigger();
 
 }
 
@@ -222,7 +215,7 @@ void ADCSetup() {
 
   // Set the Prescaler to 128 (16000KHz/128 = 125KHz)
   // Above 200KHz 10-bit results are not reliable.
-  ADCSRA |= B00000111;
+  ADCSRA = B00000111;
 
   // Set ADIE in ADCSRA (0x7A) to enable the ADC interrupt.
   // Without this, the internal interrupt will not trigger.
@@ -236,13 +229,13 @@ void ADCSetup() {
   ADCSRB &= B01000000;
 }
 
-
 // Interrupt service routine for the ADC completion
 ISR(ADC_vect){
   analogVal = ADCL | (ADCH << 8); // Must read low byte first
-  Serial.println(analogVal);
+  //Serial.println(analogVal);
+  output = int(0.501*(float)output + 0.499*(float)analogVal);
+  triggerFlag = 1;
   if (analogVal >= threshold){
-     
     trigger = true;
   }
   else 
@@ -250,7 +243,7 @@ ISR(ADC_vect){
 }
 
 void setSoundSensitivity(int val) {
-  Wire.beginTransmission(0b01011111); // transmit to device 
+  Wire.beginTransmission(0x2C); // transmit to device 
   // device address is specified in datasheet
   Wire.write(byte(0x00));            // sends instruction byte
   Wire.write(val);             // sends potentiometer value byte
@@ -258,7 +251,7 @@ void setSoundSensitivity(int val) {
 }
 
 void setLightningSensitivity(int val) {
-  Wire.beginTransmission(0b01011110); // transmit to device 
+  Wire.beginTransmission(0x2E); // transmit to device 
   // device address is specified in datasheet
   Wire.write(byte(0x00));            // sends instruction byte
   Wire.write(val);             // sends potentiometer value byte
@@ -266,13 +259,50 @@ void setLightningSensitivity(int val) {
 }
 
 void setupSoundMode() {
-  ADMUX |= 0; // Set multiplexer to 1
+  ADMUX |= 1; // Set multiplexer to 1
   threshold = soundThreshold;
 }
 
 void setupLightningMode() {
   ADMUX |= 0; // Set multiplexer to 0
   threshold = lightningThreshold;
+}
+
+void calibrateThreshold() {
+  ADCSRA |= B01000000;
+  display.clearDisplay();
+  display.display();
+  display.setCursor(0,0);
+  display.println("Calibrating");
+  display.display();
+  
+  //int threshold = 1000;
+  _delay_ms(3000);
+
+  while (1) {
+    if (triggerFlag == 1) {
+      if (output == threshold){
+        threshold = threshold + 10;
+        break;
+      }
+      threshold = output;
+      triggerFlag = 0;
+      ADCSRA |= B01000000;
+    }
+
+    display.fillRect(0, 10, 32, 10, BLACK);
+    display.setCursor(0,10);
+    display.println(output);
+    display.println(threshold);
+    display.display();
+  }
+
+  display.setCursor(60,20);
+  display.println("Calibrated");
+  display.display();
+
+  return;
+  
 }
 
 void runTrigger() {
@@ -283,13 +313,17 @@ void runTrigger() {
   _delay_ms(1000);
   display.setCursor(0,0);
   display.println("Waiting for trigger");
+  display.setCursor(60,20);
+  display.println(threshold);
   display.display();
 
-  
-  
   ADCSRA |=B01000000; // Set ADSC in ADCSRA (0x7A) to start the ADC conversion
 
   while(true) {
+  display.fillRect(0, 10, 32, 10, BLACK);
+  display.setCursor(0,10);
+  display.println(analogVal);
+  display.display();
     
     if (trigger == true) {
       
@@ -297,28 +331,26 @@ void runTrigger() {
       updateDisplay();
 
       _delay_ms(500);
+      trigger = false;
       ADCSRA |= B01000000;  // kick off next ADC conversion
+      
     }  
   }
 }
 
 void triggerCamera() {
   PORTB = triggerMask;  // trigger the outputs
-  __asm__("nop\n\t"); 
-  __asm__("nop\n\t"); 
-  __asm__("nop\n\t"); 
-  __asm__("nop\n\t"); 
+  _delay_ms(60);
   PORTB = 0b00000000;   // reset trigger outputs to off
   numberOfTriggers++;
 
   trigger = false;      // clear the trigger flag ready for another ADC conversion
-
 }
 
 
 void updateDisplay() {
-  display.fillRect(0, 10, 32, 10, BLACK);
-  display.setCursor(0,10);
+  display.fillRect(0, 20, 32, 20, BLACK);
+  display.setCursor(0,20);
   display.println(numberOfTriggers);
   display.display();
 }
@@ -362,8 +394,6 @@ void lightningMode() {
   if (getKeyPress() == 'c')
     runTrigger();
 }
-
-
 
 void soundMode() {
   Serial.println(soundThreshold);
