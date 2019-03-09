@@ -1,8 +1,14 @@
 - make footprint for microphone
 - edit footprint for 5-way switch to have outline of switch
 - move footprints to a global library
-- find smaller 16MHz crystal
-- add battery level circuitry. Will likely need a voltage reference and voltage divider.
-- change lipo charger to send status to uC
-- add automatic power switching between usb and battery to allow for uC to display battery level when charging
 - add bluetooth functionality
+
+
+REV 2 HARDWARE UPDATES
+- flip LCD header around
+- move LCD header down so that cover can close
+- get new optoisolator (4 channel)
+- get smaller crystal
+- change lipo charger to send status to uC
+- add automatic power switching between usb and battery to allow for uC to display battery level when charging 
+- add battery level circuitry. Will likely need a voltage reference and voltage divider.
