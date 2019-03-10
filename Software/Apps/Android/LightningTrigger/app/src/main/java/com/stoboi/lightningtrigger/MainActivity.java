@@ -119,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v){
                     if(mConnectedThread != null) //First check to make sure thread created
                         mConnectedThread.write("1");
+                    else
+                        Toast.makeText(getApplicationContext(),"Not Connected to Lightning Trigger",Toast.LENGTH_LONG).show();
                 }
             });
 
