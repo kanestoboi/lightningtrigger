@@ -75,7 +75,7 @@
                 android:layout_weight="0.9"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="&lt;Bluetooth Status>" />
+                android:text="Not Connected" />
         </LinearLayout>
 
         <Button
