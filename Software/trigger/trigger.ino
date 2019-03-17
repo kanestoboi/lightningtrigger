@@ -18,14 +18,14 @@ StateMachine machine = StateMachine();  // Create state machine object
 
 long lastMillis = millis();
 
-volatile bool trigger = false;
-int threshold = 1000;
-int sensitivity = 0;
+volatile bool trigger = false;  // Has the trigger threshold been met?
+int threshold = 1000;           // The level that the ADC needs to reach before the camera is triggered
+int sensitivity = 10;           // the amount above the ADC value to trigger the camera
 int soundThreshold = 761;       // Threshold for sound to trigger camera
-int lightningThreshold = 1000;   // Threshold for light to trigger camera
-int numberOfTriggers = 0;
-volatile int output = 0;
-volatile int triggerFlag = 0;
+int lightningThreshold = 1000;  // Threshold for light to trigger camera
+int numberOfTriggers = 0;       // Total times the camera has been triggered
+volatile int output = 0;        // the continious filtered ADC reading used to update the threshold
+volatile int triggerFlag = 0; 
 
 // masks used
 int triggerMask = 0b00000011;
@@ -233,13 +233,16 @@ void ADCSetup() {
 ISR(ADC_vect){
   analogVal = ADCL | (ADCH << 8); // Must read low byte first
   //Serial.println(analogVal);
-  output = int(0.501*(float)output + 0.499*(float)analogVal);
   triggerFlag = 1;
   if (analogVal >= threshold){
     trigger = true;
   }
   else 
     ADCSRA |= B01000000;  // Set ADSC in ADCSRA (0x7A) to start another ADC conversion
+
+  //update the threshold
+  output = int(0.505*(float)output + 0.495*(float)analogVal);
+  threshold = output + sensitivity;
 }
 
 void setSoundSensitivity(int val) {
