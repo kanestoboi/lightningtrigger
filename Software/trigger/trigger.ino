@@ -271,12 +271,12 @@ void setupLightningMode() {
 }
 
 void calibrateThreshold() {
-  
+  /*
   display.clearDisplay();
   display.display();
   display.setCursor(0,0);
   display.println("Calibrating");
-
+*/
   ADCSRA |= B01000000;
   
   while (1) {
@@ -322,15 +322,15 @@ void runTrigger() {
     if (trigger == true) {
       
       triggerCamera();
+      numberOfTriggers++;
       updateDisplay();
-
-      while (analogVal >= threshold)
-      ADCSRA |= B01000000;  // kick off next ADC conversion
       
       trigger = false;
+      calibrateThreshold();
       ADCSRA |= B01000000;  // kick off next ADC conversion
-      
     }
+
+    // If the ADC is complete update the threshold
     if (adcCompleteFlag == 1) {
       threshold = output + sensitivity;
 
@@ -353,9 +353,6 @@ void triggerCamera() {
   PORTB = triggerMask;  // trigger the outputs
   _delay_ms(60);
   PORTB = 0b00000000;   // reset trigger outputs to off
-  numberOfTriggers++;
-
-  trigger = false;      // clear the trigger flag ready for another ADC conversion
 }
 
 
