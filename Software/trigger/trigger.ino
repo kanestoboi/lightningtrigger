@@ -25,7 +25,7 @@ int soundThreshold = 761;       // Threshold for sound to trigger camera
 int lightningThreshold = 1000;  // Threshold for light to trigger camera
 int numberOfTriggers = 0;       // Total times the camera has been triggered
 volatile int output = 0;        // the continious filtered ADC reading used to update the threshold
-volatile int triggerFlag = 0; 
+volatile int adcCompleteFlag = 0; 
 
 // masks used
 int cameraTriggerMask = 0b00000011; // PORT B Mask
@@ -132,7 +132,7 @@ void ADCSetup() {
 ISR(ADC_vect){
   analogVal = ADCL | (ADCH << 8); // Must read low byte first
   //Serial.println(analogVal);
-  triggerFlag = 1;
+  adcCompleteFlag = 1;
   if (analogVal >= threshold){
     trigger = true;
   }
@@ -141,7 +141,6 @@ ISR(ADC_vect){
 
   //update the threshold
   output = int(0.505*(float)output + 0.495*(float)analogVal);
-  threshold = output + sensitivity;
 }
 
 void setSoundSensitivity(int val) {
@@ -171,37 +170,33 @@ void setupLightningMode() {
 }
 
 void calibrateThreshold() {
-  ADCSRA |= B01000000;
+  /*
   display.clearDisplay();
   display.display();
   display.setCursor(0,0);
   display.println("Calibrating");
-  display.display();
+*/
+  ADCSRA |= B01000000;
   
-  //int threshold = 1000;
-  _delay_ms(3000);
-
   while (1) {
-    if (triggerFlag == 1) {
+    if (adcCompleteFlag == 1) {
       if (output == threshold){
         threshold = threshold + 10;
+        adcCompleteFlag = 0;
+        trigger = false;
         break;
       }
+
       threshold = output;
-      triggerFlag = 0;
+      adcCompleteFlag = 0;
       ADCSRA |= B01000000;
     }
-
-    display.fillRect(0, 10, 32, 10, BLACK);
-    display.setCursor(0,10);
-    display.println(output);
-    display.println(threshold);
-    display.display();
   }
-
+/*
   display.setCursor(60,20);
   display.println("Calibrated");
   display.display();
+  */
 
   return;
   
@@ -226,10 +221,6 @@ void runTrigger() {
   }
 
   while(true) {
-  display.fillRect(0, 10, 32, 10, BLACK);
-  display.setCursor(0,10);
-  display.println(analogVal);
-  display.display();
     
     if (trigger == true) {
       if (ADMUX == 0)  // if lightning trigger mode trigger camera
@@ -238,14 +229,33 @@ void runTrigger() {
         triggerFlash();
       }
       
+
       updateDisplay();
 
       _delay_ms(500);
       numberOfTriggers++;
-      trigger = false;
-      ADCSRA |= B01000000;  // kick off next ADC conversion
       
-    }  
+      trigger = false;
+      calibrateThreshold();
+      ADCSRA |= B01000000;  // kick off next ADC conversion
+    }
+
+    // If the ADC is complete update the threshold
+    if (adcCompleteFlag == 1) {
+      threshold = output + sensitivity;
+
+      display.fillRect(60, 20, 70, 20, BLACK);
+      display.setCursor(60,20);
+      display.println(threshold);
+      display.display();
+      
+      adcCompleteFlag = 0;
+    }
+
+    display.fillRect(0, 10, 32, 10, BLACK);
+    display.setCursor(0,10);
+    display.println(analogVal);
+    display.display();
   }
 }
 
