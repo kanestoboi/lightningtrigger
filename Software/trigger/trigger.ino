@@ -28,7 +28,8 @@ volatile int output = 0;        // the continious filtered ADC reading used to u
 volatile int triggerFlag = 0; 
 
 // masks used
-int triggerMask = 0b00000011;
+int cameraTriggerMask = 0b00000011; // PORT B Mask
+int flashTriggerMask = 0b00000100;  // PORT B Mask
 int switchesMask = 0b01111100;
 int downMask = 0b00000100;
 int centerMask = 0b00001000;
@@ -78,109 +79,7 @@ void setup() {
 
   setupLightningMode();   // lightning trigger is the default mode on start up
 
-   /*************************
-    * Lightning Trigger State Transitions
-    */
-  S0->addTransition([](){
-    
-    if (getKeyPress() == 'd'){
-      
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0,0);
-      display.println("Sound Trigger");
-      display.setCursor(0,20);
-      display.print("Threshold: ");
-      display.println(soundThreshold);
-      display.display();
-
-      setupSoundMode();
-      
-      return true;
-    }
-    return false;
-  },S1);
-
-  S0->addTransition([](){
-    if (getKeyPress() == 'r'){
-      if (lightningThreshold < 1022)
-        lightningThreshold++;
-      display.fillRect(0, 20, 128, 30, BLACK);
-      display.setCursor(0,20);
-      display.print("Threshold: ");
-      display.println(lightningThreshold);
-      display.display();
-      return true;
-    }
-    return false;
-  },S0);
-
-  S0->addTransition([](){
-    if (getKeyPress() == 'l'){
-      if (lightningThreshold > 0)
-        lightningThreshold--;
-        
-      display.fillRect(0, 20, 128, 30, BLACK);
-      display.setCursor(0,20);
-      display.print("Threshold: ");
-      display.println(lightningThreshold);
-      display.display();
-      return true;
-    }
-    return false;
-  },S0);
-
-  /**********************
-   * Sound Trigger State Transitions
-   */
-  S1->addTransition([](){
-    if (getKeyPress() == 'u'){
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0,0);
-      display.println("Lightning Trigger");
-      display.setCursor(0,20);
-      display.print("Threshold: ");
-      display.println(lightningThreshold);
-      display.display();
-
-      setupLightningMode();
-      
-      return true;
-    }
-    return false;
-  },S0);
-  
-  S1->addTransition([](){
-    if (getKeyPress() == 'r'){
-      if (soundThreshold < 1022)
-        soundThreshold++;
-      display.fillRect(0, 20, 128, 30, BLACK);
-      display.setCursor(0,20);
-      display.print("Threshold: ");
-      display.println(soundThreshold);
-      display.display();
-      return true;
-    }
-    return false;
-  },S1);
-
-  S1->addTransition([](){
-    if (getKeyPress() == 'l'){
-      if (soundThreshold > 0)
-        soundThreshold--;
-        
-      display.fillRect(0, 20, 128, 30, BLACK);
-      display.setCursor(0,20);
-      display.print("Threshold: ");
-      display.println(soundThreshold);
-      display.display();
-      return true;
-    }
-    return false;
-  },S1);
+  createTransitions();    // setup state transitions
 
 
   //delay(4000);
@@ -322,6 +221,10 @@ void runTrigger() {
 
   ADCSRA |=B01000000; // Set ADSC in ADCSRA (0x7A) to start the ADC conversion
 
+  if (ADMUX == 1) {
+    PORTB = cameraTriggerMask;
+  }
+
   while(true) {
   display.fillRect(0, 10, 32, 10, BLACK);
   display.setCursor(0,10);
@@ -329,11 +232,16 @@ void runTrigger() {
   display.display();
     
     if (trigger == true) {
+      if (ADMUX == 0)  // if lightning trigger mode trigger camera
+        triggerCamera();
+      else if (ADMUX == 1) {  // if sound mode trigger flash
+        triggerFlash();
+      }
       
-      triggerCamera();
       updateDisplay();
 
       _delay_ms(500);
+      numberOfTriggers++;
       trigger = false;
       ADCSRA |= B01000000;  // kick off next ADC conversion
       
@@ -342,12 +250,16 @@ void runTrigger() {
 }
 
 void triggerCamera() {
-  PORTB = triggerMask;  // trigger the outputs
+  PORTB = cameraTriggerMask;  // trigger the outputs
   _delay_ms(60);
   PORTB = 0b00000000;   // reset trigger outputs to off
-  numberOfTriggers++;
+  
+}
 
-  trigger = false;      // clear the trigger flag ready for another ADC conversion
+void triggerFlash() {
+  PORTB = flashTriggerMask;  // trigger the outputs
+  _delay_ms(60);
+  PORTB = 0b00000000;   // reset trigger outputs to off
 }
 
 
@@ -402,4 +314,110 @@ void soundMode() {
   Serial.println(soundThreshold);
   if (getKeyPress() == 'c')
     runTrigger();
+}
+
+void createTransitions() {
+  /*************************
+  * Lightning Trigger State Transitions
+  */
+  S0->addTransition([](){
+    
+    if (getKeyPress() == 'd'){
+      
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0,0);
+      display.println("Sound Trigger");
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(soundThreshold);
+      display.display();
+
+      setupSoundMode();
+      
+      return true;
+    }
+    return false;
+  },S1);
+
+  S0->addTransition([](){
+    if (getKeyPress() == 'r'){
+      if (lightningThreshold < 1022)
+        lightningThreshold++;
+      display.fillRect(0, 20, 128, 30, BLACK);
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(lightningThreshold);
+      display.display();
+      return true;
+    }
+    return false;
+  },S0);
+
+  S0->addTransition([](){
+    if (getKeyPress() == 'l'){
+      if (lightningThreshold > 0)
+        lightningThreshold--;
+        
+      display.fillRect(0, 20, 128, 30, BLACK);
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(lightningThreshold);
+      display.display();
+      return true;
+    }
+    return false;
+  },S0);
+
+  /**********************
+  * Sound Trigger State Transitions
+  */
+  S1->addTransition([](){
+    if (getKeyPress() == 'u'){
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0,0);
+      display.println("Lightning Trigger");
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(lightningThreshold);
+      display.display();
+
+      setupLightningMode();
+      
+      return true;
+    }
+    return false;
+  },S0);
+  
+  S1->addTransition([](){
+    if (getKeyPress() == 'r'){
+      if (soundThreshold < 1022)
+        soundThreshold++;
+      display.fillRect(0, 20, 128, 30, BLACK);
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(soundThreshold);
+      display.display();
+      return true;
+    }
+    return false;
+  },S1);
+
+  S1->addTransition([](){
+    if (getKeyPress() == 'l'){
+      if (soundThreshold > 0)
+        soundThreshold--;
+        
+      display.fillRect(0, 20, 128, 30, BLACK);
+      display.setCursor(0,20);
+      display.print("Threshold: ");
+      display.println(soundThreshold);
+      display.display();
+      return true;
+    }
+    return false;
+  },S1);
 }
