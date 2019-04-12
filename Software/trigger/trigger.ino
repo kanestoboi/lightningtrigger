@@ -10,7 +10,7 @@
 
 #define F_CPU 16000000UL  // Define the microcontroller clock speed (16 MHz)
 
-
+long counter = 0; // debugging counter
 
 Adafruit_SSD1306 display(OLED_RESET);   // create LCD object
 StateMachine machine = StateMachine();  // Create state machine object
@@ -29,7 +29,7 @@ volatile int adcCompleteFlag = 0;
 
 // masks used
 int cameraTriggerMask = 0b00000011; // PORT B Mask
-int flashTriggerMask = 0b00000100;  // PORT B Mask
+int flashTriggerMask = 0b00001100;  // PORT B Mask
 int switchesMask = 0b01111100;
 int downMask = 0b00000100;
 int centerMask = 0b00001000;
@@ -93,10 +93,11 @@ void loop() {
   //getKeyPress();
   
   setupLightningMode();
-  calibrateThreshold();
   //setupSoundMode();
-  runTrigger();
+  calibrateThreshold();
 
+  runTrigger();
+  
 }
 
 void ADCSetup() {
@@ -130,17 +131,17 @@ void ADCSetup() {
 
 // Interrupt service routine for the ADC completion
 ISR(ADC_vect){
-  analogVal = ADCL | (ADCH << 8); // Must read low byte first
-  //Serial.println(analogVal);
   adcCompleteFlag = 1;
+  analogVal = ADCL | (ADCH << 8); // Must read low byte first
+  output = int(0.505*(float)output + 0.495*(float)analogVal);
+  //Serial.println(analogVal);
   if (analogVal >= threshold){
     trigger = true;
   }
-  else 
+  else {
     ADCSRA |= B01000000;  // Set ADSC in ADCSRA (0x7A) to start another ADC conversion
-
+  }
   //update the threshold
-  output = int(0.505*(float)output + 0.495*(float)analogVal);
 }
 
 void setSoundSensitivity(int val) {
@@ -214,28 +215,38 @@ void runTrigger() {
   display.println(threshold);
   display.display();
 
-  ADCSRA |=B01000000; // Set ADSC in ADCSRA (0x7A) to start the ADC conversion
-
-  if (ADMUX == 1) {
-    PORTB = cameraTriggerMask;
+  
+  if ((ADMUX & 0b00000001) == 1) {
+    PORTB |= cameraTriggerMask;
   }
 
+
+  delay(1000);
+  ADCSRA |=B01000000; // Set ADSC in ADCSRA (0x7A) to start the ADC conversion
+
   while(true) {
-    
+/*
+   counter++;
+  display.clearDisplay();
+  display.display();
+  display.setCursor(0,0);
+  display.println(counter);
+  display.display(); */
+  
     if (trigger == true) {
-      if (ADMUX == 0)  // if lightning trigger mode trigger camera
+      if ((ADMUX & 0b00000001) == 0)  // if lightning trigger mode trigger camera
         triggerCamera();
-      else if (ADMUX == 1) {  // if sound mode trigger flash
+      else if ((ADMUX & 0b00000001) == 1) {  // if sound mode trigger flash
         triggerFlash();
       }
       
-
-      updateDisplay();
-
+      
       _delay_ms(500);
       numberOfTriggers++;
+      updateDisplay();
       
       trigger = false;
+      //adcCompleteFlag = 0;
       calibrateThreshold();
       ADCSRA |= B01000000;  // kick off next ADC conversion
     }
@@ -244,14 +255,20 @@ void runTrigger() {
     if (adcCompleteFlag == 1) {
       threshold = output + sensitivity;
 
+      
+      display.clearDisplay();
       display.fillRect(60, 20, 70, 20, BLACK);
       display.setCursor(60,20);
       display.println(threshold);
       display.display();
       
       adcCompleteFlag = 0;
+
+      ADCSRA |= B01000000;  // kick off next ADC conversion
     }
 
+    
+    //display.clearDisplay();
     display.fillRect(0, 10, 32, 10, BLACK);
     display.setCursor(0,10);
     display.println(analogVal);
@@ -260,15 +277,15 @@ void runTrigger() {
 }
 
 void triggerCamera() {
-  PORTB = cameraTriggerMask;  // trigger the outputs
-  _delay_ms(60);
+  PORTB |= cameraTriggerMask;  // trigger the outputs
+  _delay_ms(100);
   PORTB = 0b00000000;   // reset trigger outputs to off
   
 }
 
 void triggerFlash() {
-  PORTB = flashTriggerMask;  // trigger the outputs
-  _delay_ms(60);
+  PORTB |= flashTriggerMask;  // trigger the outputs
+  _delay_ms(100);
   PORTB = 0b00000000;   // reset trigger outputs to off
 }
 
