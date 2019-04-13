@@ -25,6 +25,7 @@ F 3 "" H 2100 3850 50  0001 C CNN
 F 4 "SFH 310-2/3" H 2100 3850 60  0001 C CNN "Manufacturer P/N"
 F 5 "Digi-key" H 2100 3850 60  0001 C CNN "Supplier"
 F 6 "475-1443-ND" H 2100 3850 60  0001 C CNN "Supplier P/N"
+F 7 "OSRAM Opto Semiconductors" H 0   0   50  0001 C CNN "Manufacturer"
 	1    2100 3850
 	1    0    0    -1  
 $EndComp
@@ -64,35 +65,21 @@ LIGHT_OUT
 Text GLabel 9000 2100 2    45   Input ~ 0
 LIGHT_OUT
 $Comp
-L ltv-827s:LTV-827S U5
-U 1 1 5C383F4A
-P 9100 5850
-F 0 "U5" H 8650 6100 45  0000 C CNN
-F 1 "LTV-827S" H 8800 5600 45  0000 C CNN
-F 2 "LTV-827S-TA1:LTV-827S-TA1" H 8850 5850 45  0001 C CNN
-F 3 "" H 8850 5850 45  0001 C CNN
-F 4 "LTV-827S-TA1" H 9100 5850 60  0001 C CNN "Manufacturer P/N"
-F 5 "Digi-key" H 9100 5850 60  0001 C CNN "Supplier"
-F 6 "160-2040-1-ND" H 9100 5850 60  0001 C CNN "Supplier P/N"
-	1    9100 5850
-	1    0    0    -1  
-$EndComp
-$Comp
 L pj-237-6a:PJ-237-6A J5
 U 1 1 5C384066
-P 10700 5750
-F 0 "J5" H 10550 6000 60  0000 C CNN
-F 1 "PJ-237-6A" H 10750 5900 60  0000 C CNN
-F 2 "PJ-237-6A:PJ-237-6A" H 10850 5750 60  0001 C CNN
-F 3 "https://datasheet.lcsc.com/szlcsc/Korean-Hroparts-Elec-PJ-237-6A_C128992.pdf" H 9900 5000 60  0001 C CNN
-F 4 "PJ-237-6A" H 10750 5900 60  0000 C CNN "Manufacturer P/N"
-	1    10700 5750
+P 10900 5700
+F 0 "J5" H 10750 5950 60  0000 C CNN
+F 1 "PJ-237-6A" H 10950 5850 60  0000 C CNN
+F 2 "PJ-237-6A:PJ-237-6A" H 11050 5700 60  0001 C CNN
+F 3 "https://datasheet.lcsc.com/szlcsc/Korean-Hroparts-Elec-PJ-237-6A_C128992.pdf" H 10100 4950 60  0001 C CNN
+F 4 "PJ-237-6A" H 10950 5850 60  0000 C CNN "Manufacturer P/N"
+	1    10900 5700
 	-1   0    0    -1  
 $EndComp
-Text GLabel 8350 5100 0    45   Input ~ 0
-FOCUS
-Text GLabel 8350 4900 0    45   Input ~ 0
-SHUTTER
+Text GLabel 9650 5050 0    45   Input ~ 0
+FOCUS3
+Text GLabel 9650 4500 0    45   Input ~ 0
+SHUTTER3
 $Comp
 L linear:MCP6001 U1
 U 1 1 5C3939EA
@@ -104,6 +91,7 @@ F 3 "" H 2500 1650 50  0001 C CNN
 F 4 "MCP6001T-I/OT" H 2500 1450 60  0001 C CNN "Manufacturer P/N"
 F 5 "Digi-key" H 2500 1450 60  0001 C CNN "Supplier"
 F 6 "MCP6001T-I/OTCT-ND" H 2500 1450 60  0001 C CNN "Supplier P/N"
+F 7 "Microchip Technology" H 0   0   50  0001 C CNN "Manufacturer"
 	1    2500 1450
 	1    0    0    -1  
 $EndComp
@@ -153,17 +141,6 @@ F 1 "VDDA" H 2400 1150 50  0000 C CNN
 F 2 "" H 2400 1000 50  0001 C CNN
 F 3 "" H 2400 1000 50  0001 C CNN
 	1    2400 1000
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GNDD #PWR025
-U 1 1 5C3949DA
-P 7600 6050
-F 0 "#PWR025" H 7600 5800 50  0001 C CNN
-F 1 "GNDD" H 7600 5925 50  0000 C CNN
-F 2 "" H 7600 6050 50  0001 C CNN
-F 3 "" H 7600 6050 50  0001 C CNN
-	1    7600 6050
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -229,7 +206,7 @@ Text Notes 1450 750  0    197  ~ 0
 Microphone Sensor
 Text Notes 750  3050 0    197  ~ 0
 Light Sensor
-Text Notes 8150 4650 0    197  ~ 0
+Text Notes 7950 4200 0    197  ~ 0
 Camera Trigger
 Text GLabel 9000 2500 2    45   Input ~ 0
 SDA
@@ -272,6 +249,7 @@ F 3 "" H 7900 2350 50  0001 C CNN
 F 4 "ATMEGA328P-AU" H 7900 2350 50  0001 C CNN "Manufacturer P/N"
 F 5 "N/A" H 7900 2350 50  0001 C CNN "Supplier"
 F 6 "N/A" H 7900 2350 50  0001 C CNN "Supplier P/N"
+F 7 "Microchip Technology" H 0   0   50  0001 C CNN "Manufacturer"
 	1    7900 2350
 	1    0    0    -1  
 $EndComp
@@ -296,11 +274,12 @@ U 1 1 5C3AC7CC
 P 800 6550
 F 0 "J6" H 600 7000 50  0000 L CNN
 F 1 "USB_OTG" H 600 6900 50  0000 L CNN
-F 2 "" H 950 6500 50  0001 C CNN
+F 2 "USB:USB_Micro_C77238" H 950 6500 50  0001 C CNN
 F 3 "" H 950 6500 50  0001 C CNN
-F 4 "N/A" H 800 6550 50  0001 C CNN "Manufacturer P/N"
+F 4 "" H 800 6550 50  0001 C CNN "Manufacturer P/N"
 F 5 "LCSC" H 800 6550 50  0001 C CNN "Supplier"
 F 6 "C77238" H 800 6550 50  0001 C CNN "Supplier P/N"
+F 7 "" H 0   0   50  0001 C CNN "Manufacturer"
 	1    800  6550
 	1    0    0    -1  
 $EndComp
@@ -495,34 +474,9 @@ Wire Wire Line
 	2300 4150 2200 4150
 Connection ~ 2200 4150
 Wire Wire Line
-	9800 5800 10100 5800
+	9650 6150 9700 6150
 Wire Wire Line
-	10100 5800 10100 6000
-Wire Wire Line
-	10100 6250 10950 6250
-Wire Wire Line
-	9800 6000 10100 6000
-Connection ~ 10100 6000
-Wire Wire Line
-	9800 5900 10250 5900
-Wire Wire Line
-	10250 5900 10250 6000
-Wire Wire Line
-	10250 6000 10350 6000
-Wire Wire Line
-	7950 5800 8400 5800
-Wire Wire Line
-	8300 6000 8400 6000
-Wire Wire Line
-	7400 5800 7400 6000
-Wire Wire Line
-	7400 5800 7650 5800
-Wire Wire Line
-	7400 6000 7600 6000
-Wire Wire Line
-	8350 5700 8400 5700
-Wire Wire Line
-	8400 5900 8350 5900
+	9700 5600 9650 5600
 Wire Wire Line
 	2400 1800 2400 1750
 Wire Wire Line
@@ -538,9 +492,6 @@ Wire Wire Line
 	2050 2050 2800 2050
 Wire Wire Line
 	2400 1000 2400 1150
-Wire Wire Line
-	7600 6050 7600 6000
-Connection ~ 7600 6000
 Wire Wire Line
 	1250 1250 1250 1350
 Wire Wire Line
@@ -803,7 +754,7 @@ F 7 "Panasonic" H 0   0   50  0001 C CNN "Manufacturer"
 $EndComp
 Wire Wire Line
 	3600 4950 3700 4950
-Text Notes 2700 4250 0    197  ~ 0
+Text Notes 2750 3900 0    197  ~ 0
 Digital and Analogue Separation
 $Comp
 L power:VDD #PWR016
@@ -840,7 +791,7 @@ Wire Wire Line
 Wire Wire Line
 	6950 1850 6950 1550
 Connection ~ 6950 1550
-Text Notes 6350 5000 0    60   ~ 0
+Text Notes 5600 4100 0    60   ~ 0
 STAR GROUND
 $Comp
 L Device:C C8
@@ -905,11 +856,7 @@ $EndComp
 Wire Wire Line
 	2200 4150 2200 4250
 Wire Wire Line
-	10100 6000 10100 6250
-Wire Wire Line
 	2050 2050 2050 2150
-Wire Wire Line
-	7600 6000 8000 6000
 Wire Wire Line
 	1250 1350 1250 1400
 Wire Wire Line
@@ -962,12 +909,6 @@ Wire Wire Line
 Connection ~ 3850 6900
 Wire Wire Line
 	3850 6900 3850 6950
-Wire Wire Line
-	9800 5700 10200 5700
-Wire Wire Line
-	10200 5700 10200 6100
-Wire Wire Line
-	10200 6100 10350 6100
 $Comp
 L power:VDD #PWR0102
 U 1 1 5C4BC494
@@ -1095,98 +1036,48 @@ F 3 "" H 2600 2150 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L ltv-827s:LTV-827S U9
-U 1 1 5C47B78A
-P 9100 5050
-F 0 "U9" H 8650 5300 45  0000 C CNN
-F 1 "LTV-827S" H 8800 4800 45  0000 C CNN
-F 2 "LTV-827S-TA1:LTV-827S-TA1" H 8850 5050 45  0001 C CNN
-F 3 "" H 8850 5050 45  0001 C CNN
-F 4 "LTV-827S-TA1" H 9100 5050 60  0001 C CNN "Manufacturer P/N"
-F 5 "Digi-key" H 9100 5050 60  0001 C CNN "Supplier"
-F 6 "160-2040-1-ND" H 9100 5050 60  0001 C CNN "Supplier P/N"
-	1    9100 5050
-	1    0    0    -1  
-$EndComp
-$Comp
 L pj-237-6a:PJ-237-6A J4
 U 1 1 5C47B792
-P 10700 4950
-F 0 "J4" H 10550 5200 60  0000 C CNN
-F 1 "PJ-237-6A" H 10750 5100 60  0000 C CNN
-F 2 "PJ-237-6A:PJ-237-6A" H 10850 4950 60  0001 C CNN
-F 3 "https://datasheet.lcsc.com/szlcsc/Korean-Hroparts-Elec-PJ-237-6A_C128992.pdf" H 9900 4200 60  0001 C CNN
-F 4 "PJ-237-6A" H 10750 5100 60  0000 C CNN "Manufacturer P/N"
-	1    10700 4950
+P 10900 4600
+F 0 "J4" H 10750 4850 60  0000 C CNN
+F 1 "PJ-237-6A" H 10950 4750 60  0000 C CNN
+F 2 "PJ-237-6A:PJ-237-6A" H 11050 4600 60  0001 C CNN
+F 3 "https://datasheet.lcsc.com/szlcsc/Korean-Hroparts-Elec-PJ-237-6A_C128992.pdf" H 10100 3850 60  0001 C CNN
+F 4 "PJ-237-6A" H 10950 4750 60  0000 C CNN "Manufacturer P/N"
+	1    10900 4600
 	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	9800 5000 10100 5000
-Wire Wire Line
-	10100 5000 10100 5200
-Wire Wire Line
-	10100 5450 10950 5450
-Wire Wire Line
-	9800 5200 10100 5200
-Connection ~ 10100 5200
-Wire Wire Line
-	9800 5100 10250 5100
-Wire Wire Line
-	10250 5100 10250 5200
-Wire Wire Line
-	10250 5200 10350 5200
-Wire Wire Line
-	10100 5200 10100 5450
-Wire Wire Line
-	9800 4900 10200 4900
-Wire Wire Line
-	10200 4900 10200 5300
-Wire Wire Line
-	10200 5300 10350 5300
 $Comp
 L power:GNDD #PWR0113
 U 1 1 5C488610
-P 7600 5250
-F 0 "#PWR0113" H 7600 5000 50  0001 C CNN
-F 1 "GNDD" H 7600 5125 50  0000 C CNN
-F 2 "" H 7600 5250 50  0001 C CNN
-F 3 "" H 7600 5250 50  0001 C CNN
-	1    7600 5250
+P 9050 4950
+F 0 "#PWR0113" H 9050 4700 50  0001 C CNN
+F 1 "GNDD" H 9050 4825 50  0000 C CNN
+F 2 "" H 9050 4950 50  0001 C CNN
+F 3 "" H 9050 4950 50  0001 C CNN
+	1    9050 4950
 	1    0    0    -1  
 $EndComp
+Text GLabel 9650 5600 0    45   Input ~ 0
+SHUTTER4
+Text GLabel 9650 6150 0    45   Input ~ 0
+FOCUS4
 Wire Wire Line
-	7950 5000 8400 5000
+	9700 5050 9650 5050
 Wire Wire Line
-	7400 5000 7400 5200
+	9700 4500 9650 4500
 Wire Wire Line
-	7400 5000 7650 5000
-Wire Wire Line
-	7400 5200 7600 5200
-Wire Wire Line
-	7600 5250 7600 5200
-Connection ~ 7600 5200
-Wire Wire Line
-	7600 5200 8000 5200
-Text GLabel 8350 5900 0    45   Input ~ 0
-SHUTTER2
-Text GLabel 8350 5700 0    45   Input ~ 0
-FOCUS2
-Wire Wire Line
-	8400 5100 8350 5100
-Wire Wire Line
-	8400 4900 8350 4900
-Wire Wire Line
-	8400 5200 8300 5200
+	9700 5250 9600 5250
 Text GLabel 9000 1450 2    45   Input ~ 0
 SHUTTER2
 Wire Wire Line
 	9000 1450 8900 1450
-Text GLabel 10650 4300 0    45   Input ~ 0
+Text GLabel 10450 1550 0    45   Input ~ 0
 FOCUS2
-Text GLabel 10850 4300 2    45   Input ~ 0
+Text GLabel 10650 1550 2    45   Input ~ 0
 MOSI
 Wire Wire Line
-	10850 4300 10650 4300
+	10650 1550 10450 1550
 $Comp
 L lightning-trigger-rescue:MCP4532-Digital_Pots U10
 U 1 1 5C5096CA
@@ -1198,6 +1089,7 @@ F 3 "" H 1400 4200 50  0001 C CNN
 F 4 "MCP4532T-103E/MS" H 1400 4200 50  0001 C CNN "Manufacturer P/N"
 F 5 "Digikey" H 1400 4200 50  0001 C CNN "Supplier"
 F 6 "MCP4532T-103E/MSCT-ND" H 1400 4200 50  0001 C CNN "Supplier P/N"
+F 7 "Toshiba" H 0   0   50  0001 C CNN "Manufacturer"
 	1    1400 4200
 	1    0    0    -1  
 $EndComp
@@ -1260,6 +1152,7 @@ F 3 "" H 3350 2100 50  0001 C CNN
 F 4 "MCP4532T-103E/MS" H 3350 2100 50  0001 C CNN "Manufacturer P/N"
 F 5 "Digikey" H 3350 2100 50  0001 C CNN "Supplier"
 F 6 "MCP4532T-103E/MSCT-ND" H 3350 2100 50  0001 C CNN "Supplier P/N"
+F 7 "Toshiba" H 0   0   50  0001 C CNN "Manufacturer"
 	1    3350 2100
 	-1   0    0    1   
 $EndComp
@@ -1301,28 +1194,6 @@ Wire Wire Line
 	3950 1900 3950 1950
 Wire Wire Line
 	3950 1950 3900 1950
-$Comp
-L lightning-trigger-rescue:BC846B_215-dk_Transistors-Bipolar-BJT-Single Q2
-U 1 1 5C59307E
-P 4850 4750
-F 0 "Q2" V 5197 4750 60  0000 C CNN
-F 1 "BC846B_215" V 5091 4750 60  0000 C CNN
-F 2 "digikey-footprints:SOT-23-3" H 5050 4950 60  0001 L CNN
-F 3 "https://assets.nexperia.com/documents/data-sheet/BC846_SER.pdf" H 5050 5050 60  0001 L CNN
-F 4 "1727-2920-1-ND" H 5050 5150 60  0001 L CNN "Digi-Key_PN"
-F 5 "BC846B,215" H 5050 5250 60  0001 L CNN "MPN"
-F 6 "Discrete Semiconductor Products" H 5050 5350 60  0001 L CNN "Category"
-F 7 "Transistors - Bipolar (BJT) - Single" H 5050 5450 60  0001 L CNN "Family"
-F 8 "https://assets.nexperia.com/documents/data-sheet/BC846_SER.pdf" H 5050 5550 60  0001 L CNN "DK_Datasheet_Link"
-F 9 "/product-detail/en/nexperia-usa-inc/BC846B,215/1727-2920-1-ND/763459" H 5050 5650 60  0001 L CNN "DK_Detail_Page"
-F 10 "TRANS NPN 65V 0.1A SOT23" H 5050 5750 60  0001 L CNN "Description"
-F 11 "Nexperia USA Inc." H 5050 5850 60  0001 L CNN "Manufacturer"
-F 12 "Active" H 5050 5950 60  0001 L CNN "Status"
-F 13 "Digikey" V 4850 4750 50  0001 C CNN "Supplier"
-F 14 "1727-2920-1-ND" V 4850 4750 50  0001 C CNN "Supplier P/N"
-	1    4850 4750
-	0    -1   -1   0   
-$EndComp
 $Comp
 L power:VDD #PWR04
 U 1 1 5C3B35B1
@@ -1470,61 +1341,61 @@ $EndComp
 $Comp
 L Device:R R9
 U 1 1 5C67756C
-P 7800 5800
-F 0 "R9" V 7880 5800 50  0000 C CNN
-F 1 "150" V 7800 5800 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 7730 5800 50  0001 C CNN
-F 3 "" H 7800 5800 50  0001 C CNN
-F 4 "ERJ-3GEYJ151V" V 7800 5800 50  0001 C CNN "Manufacturer P/N"
-F 5 "" V 7800 5800 50  0001 C CNN "Supplier"
-F 6 "" V 7800 5800 50  0001 C CNN "Supplier P/N"
-F 7 "Panasonic" H 0   0   50  0001 C CNN "Manufacturer"
-	1    7800 5800
+P 9450 5800
+F 0 "R9" V 9530 5800 50  0000 C CNN
+F 1 "150" V 9450 5800 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 9380 5800 50  0001 C CNN
+F 3 "" H 9450 5800 50  0001 C CNN
+F 4 "ERJ-3GEYJ151V" V 9450 5800 50  0001 C CNN "Manufacturer P/N"
+F 5 "" V 9450 5800 50  0001 C CNN "Supplier"
+F 6 "" V 9450 5800 50  0001 C CNN "Supplier P/N"
+F 7 "Panasonic" H 1650 0   50  0001 C CNN "Manufacturer"
+	1    9450 5800
 	0    1    1    0   
 $EndComp
 $Comp
 L Device:R R10
 U 1 1 5C677681
-P 8150 6000
-F 0 "R10" V 8230 6000 50  0000 C CNN
-F 1 "150" V 8150 6000 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 8080 6000 50  0001 C CNN
-F 3 "" H 8150 6000 50  0001 C CNN
-F 4 "ERJ-3GEYJ151V" V 8150 6000 50  0001 C CNN "Manufacturer P/N"
-F 5 "" V 8150 6000 50  0001 C CNN "Supplier"
-F 6 "" V 8150 6000 50  0001 C CNN "Supplier P/N"
-F 7 "Panasonic" H 0   0   50  0001 C CNN "Manufacturer"
-	1    8150 6000
+P 9450 6350
+F 0 "R10" V 9530 6350 50  0000 C CNN
+F 1 "150" V 9450 6350 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 9380 6350 50  0001 C CNN
+F 3 "" H 9450 6350 50  0001 C CNN
+F 4 "ERJ-3GEYJ151V" V 9450 6350 50  0001 C CNN "Manufacturer P/N"
+F 5 "" V 9450 6350 50  0001 C CNN "Supplier"
+F 6 "" V 9450 6350 50  0001 C CNN "Supplier P/N"
+F 7 "Panasonic" H 1300 350 50  0001 C CNN "Manufacturer"
+	1    9450 6350
 	0    1    1    0   
 $EndComp
 $Comp
 L Device:R R19
 U 1 1 5C677C8F
-P 8150 5200
-F 0 "R19" V 8230 5200 50  0000 C CNN
-F 1 "150" V 8150 5200 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 8080 5200 50  0001 C CNN
-F 3 "" H 8150 5200 50  0001 C CNN
-F 4 "ERJ-3GEYJ151V" V 8150 5200 50  0001 C CNN "Manufacturer P/N"
-F 5 "" V 8150 5200 50  0001 C CNN "Supplier"
-F 6 "" V 8150 5200 50  0001 C CNN "Supplier P/N"
-F 7 "Panasonic" H 0   0   50  0001 C CNN "Manufacturer"
-	1    8150 5200
+P 9450 5250
+F 0 "R19" V 9530 5250 50  0000 C CNN
+F 1 "150" V 9450 5250 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 9380 5250 50  0001 C CNN
+F 3 "" H 9450 5250 50  0001 C CNN
+F 4 "ERJ-3GEYJ151V" V 9450 5250 50  0001 C CNN "Manufacturer P/N"
+F 5 "" V 9450 5250 50  0001 C CNN "Supplier"
+F 6 "" V 9450 5250 50  0001 C CNN "Supplier P/N"
+F 7 "Panasonic" H 1300 50  50  0001 C CNN "Manufacturer"
+	1    9450 5250
 	0    1    1    0   
 $EndComp
 $Comp
 L Device:R R18
 U 1 1 5C677D1F
-P 7800 5000
-F 0 "R18" V 7880 5000 50  0000 C CNN
-F 1 "150" V 7800 5000 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 7730 5000 50  0001 C CNN
-F 3 "" H 7800 5000 50  0001 C CNN
-F 4 "ERJ-3GEYJ151V" V 7800 5000 50  0001 C CNN "Manufacturer P/N"
-F 5 "" V 7800 5000 50  0001 C CNN "Supplier"
-F 6 "" V 7800 5000 50  0001 C CNN "Supplier P/N"
-F 7 "Panasonic" H 0   0   50  0001 C CNN "Manufacturer"
-	1    7800 5000
+P 9450 4700
+F 0 "R18" V 9530 4700 50  0000 C CNN
+F 1 "150" V 9450 4700 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 9380 4700 50  0001 C CNN
+F 3 "" H 9450 4700 50  0001 C CNN
+F 4 "ERJ-3GEYJ151V" V 9450 4700 50  0001 C CNN "Manufacturer P/N"
+F 5 "" V 9450 4700 50  0001 C CNN "Supplier"
+F 6 "" V 9450 4700 50  0001 C CNN "Supplier P/N"
+F 7 "Panasonic" H 1650 -300 50  0001 C CNN "Manufacturer"
+	1    9450 4700
 	0    1    1    0   
 $EndComp
 $Comp
@@ -1679,4 +1550,390 @@ Wire Wire Line
 	9050 3450 8900 3450
 Wire Wire Line
 	9050 3550 8900 3550
+$Comp
+L Isolator:TLP291-4 U5
+U 2 1 5CB27A56
+P 10000 4600
+F 0 "U5" H 10000 4925 50  0000 C CNN
+F 1 "TLP291-4" H 10000 4834 50  0000 C CNN
+F 2 "Package_SO:SOIC-16_4.55x10.3mm_P1.27mm" H 9800 4400 50  0001 L CIN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=12858&prodName=TLP291-4" H 10000 4600 50  0001 L CNN
+	2    10000 4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Isolator:TLP291-4 U5
+U 4 1 5CB27B33
+P 10000 5150
+F 0 "U5" H 10000 5475 50  0000 C CNN
+F 1 "TLP291-4" H 10000 5384 50  0000 C CNN
+F 2 "Package_SO:SOIC-16_4.55x10.3mm_P1.27mm" H 9800 4950 50  0001 L CIN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=12858&prodName=TLP291-4" H 10000 5150 50  0001 L CNN
+	4    10000 5150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Isolator:TLP291-4 U9
+U 2 1 5CB27C36
+P 10000 5700
+F 0 "U9" H 10000 6025 50  0000 C CNN
+F 1 "TLP291-4" H 10000 5934 50  0000 C CNN
+F 2 "Package_SO:SOIC-16_4.55x10.3mm_P1.27mm" H 9800 5500 50  0001 L CIN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=12858&prodName=TLP291-4" H 10000 5700 50  0001 L CNN
+	2    10000 5700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Isolator:TLP291-4 U9
+U 4 1 5CB27CEF
+P 10000 6250
+F 0 "U9" H 10000 6575 50  0000 C CNN
+F 1 "TLP291-4" H 10000 6484 50  0000 C CNN
+F 2 "Package_SO:SOIC-16_4.55x10.3mm_P1.27mm" H 9800 6050 50  0001 L CIN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=12858&prodName=TLP291-4" H 10000 6250 50  0001 L CNN
+	4    10000 6250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9600 4700 9700 4700
+Wire Wire Line
+	9300 5250 9200 5250
+Wire Wire Line
+	9200 5250 9200 4950
+Wire Wire Line
+	9200 4950 9050 4950
+Wire Wire Line
+	9300 4700 9200 4700
+Wire Wire Line
+	9200 4700 9200 4950
+Connection ~ 9200 4950
+Wire Wire Line
+	9700 6350 9600 6350
+$Comp
+L power:GNDD #PWR0106
+U 1 1 5CCA9E50
+P 9050 6050
+F 0 "#PWR0106" H 9050 5800 50  0001 C CNN
+F 1 "GNDD" H 9050 5925 50  0000 C CNN
+F 2 "" H 9050 6050 50  0001 C CNN
+F 3 "" H 9050 6050 50  0001 C CNN
+	1    9050 6050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9300 6350 9200 6350
+Wire Wire Line
+	9200 6350 9200 6050
+Wire Wire Line
+	9200 6050 9050 6050
+Wire Wire Line
+	9300 5800 9200 5800
+Wire Wire Line
+	9200 5800 9200 6050
+Connection ~ 9200 6050
+Wire Wire Line
+	9600 5800 9700 5800
+$Comp
+L Transistor_BJT:MMBT3904 Q2
+U 1 1 5CD10B44
+P 4850 4750
+F 0 "Q2" V 5178 4750 50  0000 C CNN
+F 1 "MMBT3904" V 5087 4750 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:SOT-23" H 5050 4675 50  0001 L CIN
+F 3 "https://www.fairchildsemi.com/datasheets/2N/2N3904.pdf" H 4850 4750 50  0001 L CNN
+F 4 "ON Semiconductor" H 0   0   50  0001 C CNN "Manufacturer"
+F 5 "MMBT3904LT1G" H 0   0   50  0001 C CNN "Manufacturer P/N"
+F 6 "Macrofab" H 0   0   50  0001 C CNN "Supplier"
+F 7 "MF-DSC-SOT233-MMBT3904" H 0   0   50  0001 C CNN "Supplier P/N"
+	1    4850 4750
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Isolator:TLP291-4 U5
+U 1 1 5CD117FD
+P 7750 4600
+F 0 "U5" H 7750 4925 50  0000 C CNN
+F 1 "TLP291-4" H 7750 4834 50  0000 C CNN
+F 2 "Package_SO:SOIC-16_4.55x10.3mm_P1.27mm" H 7550 4400 50  0001 L CIN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=12858&prodName=TLP291-4" H 7750 4600 50  0001 L CNN
+	1    7750 4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Isolator:TLP291-4 U5
+U 3 1 5CD118D8
+P 7750 5150
+F 0 "U5" H 7750 5475 50  0000 C CNN
+F 1 "TLP291-4" H 7750 5384 50  0000 C CNN
+F 2 "Package_SO:SOIC-16_4.55x10.3mm_P1.27mm" H 7550 4950 50  0001 L CIN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=12858&prodName=TLP291-4" H 7750 5150 50  0001 L CNN
+	3    7750 5150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Isolator:TLP291-4 U9
+U 1 1 5CD119AF
+P 7750 5700
+F 0 "U9" H 7750 6025 50  0000 C CNN
+F 1 "TLP291-4" H 7750 5934 50  0000 C CNN
+F 2 "Package_SO:SOIC-16_4.55x10.3mm_P1.27mm" H 7550 5500 50  0001 L CIN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=12858&prodName=TLP291-4" H 7750 5700 50  0001 L CNN
+	1    7750 5700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Isolator:TLP291-4 U9
+U 3 1 5CD11A7E
+P 7750 6250
+F 0 "U9" H 7750 6575 50  0000 C CNN
+F 1 "TLP291-4" H 7750 6484 50  0000 C CNN
+F 2 "Package_SO:SOIC-16_4.55x10.3mm_P1.27mm" H 7550 6050 50  0001 L CIN
+F 3 "https://toshiba.semicon-storage.com/info/docget.jsp?did=12858&prodName=TLP291-4" H 7750 6250 50  0001 L CNN
+	3    7750 6250
+	1    0    0    -1  
+$EndComp
+Text GLabel 7400 5050 0    45   Input ~ 0
+FOCUS1
+Text GLabel 7400 4500 0    45   Input ~ 0
+SHUTTER1
+Wire Wire Line
+	7400 6150 7450 6150
+Wire Wire Line
+	7450 5600 7400 5600
+$Comp
+L power:GNDD #PWR0120
+U 1 1 5CD1E56D
+P 6800 4950
+F 0 "#PWR0120" H 6800 4700 50  0001 C CNN
+F 1 "GNDD" H 6800 4825 50  0000 C CNN
+F 2 "" H 6800 4950 50  0001 C CNN
+F 3 "" H 6800 4950 50  0001 C CNN
+	1    6800 4950
+	1    0    0    -1  
+$EndComp
+Text GLabel 7400 5600 0    45   Input ~ 0
+SHUTTER2
+Text GLabel 7400 6150 0    45   Input ~ 0
+FOCUS2
+Wire Wire Line
+	7450 5050 7400 5050
+Wire Wire Line
+	7450 4500 7400 4500
+Wire Wire Line
+	7450 5250 7350 5250
+$Comp
+L Device:R R7
+U 1 1 5CD1E57C
+P 7200 5800
+F 0 "R7" V 7280 5800 50  0000 C CNN
+F 1 "150" V 7200 5800 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 7130 5800 50  0001 C CNN
+F 3 "" H 7200 5800 50  0001 C CNN
+F 4 "ERJ-3GEYJ151V" V 7200 5800 50  0001 C CNN "Manufacturer P/N"
+F 5 "" V 7200 5800 50  0001 C CNN "Supplier"
+F 6 "" V 7200 5800 50  0001 C CNN "Supplier P/N"
+F 7 "Panasonic" H -600 0   50  0001 C CNN "Manufacturer"
+	1    7200 5800
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R15
+U 1 1 5CD1E587
+P 7200 6350
+F 0 "R15" V 7280 6350 50  0000 C CNN
+F 1 "150" V 7200 6350 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 7130 6350 50  0001 C CNN
+F 3 "" H 7200 6350 50  0001 C CNN
+F 4 "ERJ-3GEYJ151V" V 7200 6350 50  0001 C CNN "Manufacturer P/N"
+F 5 "" V 7200 6350 50  0001 C CNN "Supplier"
+F 6 "" V 7200 6350 50  0001 C CNN "Supplier P/N"
+F 7 "Panasonic" H -950 350 50  0001 C CNN "Manufacturer"
+	1    7200 6350
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R6
+U 1 1 5CD1E592
+P 7200 5250
+F 0 "R6" V 7280 5250 50  0000 C CNN
+F 1 "150" V 7200 5250 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 7130 5250 50  0001 C CNN
+F 3 "" H 7200 5250 50  0001 C CNN
+F 4 "ERJ-3GEYJ151V" V 7200 5250 50  0001 C CNN "Manufacturer P/N"
+F 5 "" V 7200 5250 50  0001 C CNN "Supplier"
+F 6 "" V 7200 5250 50  0001 C CNN "Supplier P/N"
+F 7 "Panasonic" H -950 50  50  0001 C CNN "Manufacturer"
+	1    7200 5250
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R5
+U 1 1 5CD1E59D
+P 7200 4700
+F 0 "R5" V 7280 4700 50  0000 C CNN
+F 1 "150" V 7200 4700 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 7130 4700 50  0001 C CNN
+F 3 "" H 7200 4700 50  0001 C CNN
+F 4 "ERJ-3GEYJ151V" V 7200 4700 50  0001 C CNN "Manufacturer P/N"
+F 5 "" V 7200 4700 50  0001 C CNN "Supplier"
+F 6 "" V 7200 4700 50  0001 C CNN "Supplier P/N"
+F 7 "Panasonic" H -600 -300 50  0001 C CNN "Manufacturer"
+	1    7200 4700
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	7350 4700 7450 4700
+Wire Wire Line
+	7050 5250 6950 5250
+Wire Wire Line
+	6950 5250 6950 4950
+Wire Wire Line
+	6950 4950 6800 4950
+Wire Wire Line
+	7050 4700 6950 4700
+Wire Wire Line
+	6950 4700 6950 4950
+Connection ~ 6950 4950
+Wire Wire Line
+	7450 6350 7350 6350
+$Comp
+L power:GNDD #PWR0121
+U 1 1 5CD1E5AC
+P 6800 6050
+F 0 "#PWR0121" H 6800 5800 50  0001 C CNN
+F 1 "GNDD" H 6800 5925 50  0000 C CNN
+F 2 "" H 6800 6050 50  0001 C CNN
+F 3 "" H 6800 6050 50  0001 C CNN
+	1    6800 6050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7050 6350 6950 6350
+Wire Wire Line
+	6950 6350 6950 6050
+Wire Wire Line
+	6950 6050 6800 6050
+Wire Wire Line
+	7050 5800 6950 5800
+Wire Wire Line
+	6950 5800 6950 6050
+Connection ~ 6950 6050
+Wire Wire Line
+	7350 5800 7450 5800
+Wire Wire Line
+	11150 6350 11150 6200
+Wire Wire Line
+	10300 5250 10450 5250
+Wire Wire Line
+	11150 5250 11150 5100
+Wire Wire Line
+	10300 5050 10350 5050
+Wire Wire Line
+	10350 5050 10350 4950
+Wire Wire Line
+	10350 4950 10550 4950
+Wire Wire Line
+	10300 4700 10350 4700
+Wire Wire Line
+	10350 4700 10350 4850
+Wire Wire Line
+	10350 4850 10550 4850
+Wire Wire Line
+	10300 4500 10450 4500
+Wire Wire Line
+	10450 4500 10450 5250
+Connection ~ 10450 5250
+Wire Wire Line
+	10450 5250 11150 5250
+Wire Wire Line
+	10300 6350 10450 6350
+Wire Wire Line
+	10300 6150 10350 6150
+Wire Wire Line
+	10350 6150 10350 6050
+Wire Wire Line
+	10350 6050 10550 6050
+Wire Wire Line
+	10300 5800 10350 5800
+Wire Wire Line
+	10350 5800 10350 5950
+Wire Wire Line
+	10350 5950 10550 5950
+Wire Wire Line
+	10300 5600 10450 5600
+Wire Wire Line
+	10450 5600 10450 6350
+Connection ~ 10450 6350
+Wire Wire Line
+	10450 6350 11150 6350
+$Comp
+L pj-237-6a:PJ-237-6A J9
+U 1 1 5CED4B03
+P 8650 5700
+F 0 "J9" H 8500 5950 60  0000 C CNN
+F 1 "PJ-237-6A" H 8700 5850 60  0000 C CNN
+F 2 "PJ-237-6A:PJ-237-6A" H 8800 5700 60  0001 C CNN
+F 3 "https://datasheet.lcsc.com/szlcsc/Korean-Hroparts-Elec-PJ-237-6A_C128992.pdf" H 7850 4950 60  0001 C CNN
+F 4 "PJ-237-6A" H 8700 5850 60  0000 C CNN "Manufacturer P/N"
+	1    8650 5700
+	-1   0    0    -1  
+$EndComp
+$Comp
+L pj-237-6a:PJ-237-6A J1
+U 1 1 5CED4B0B
+P 8650 4600
+F 0 "J1" H 8500 4850 60  0000 C CNN
+F 1 "PJ-237-6A" H 8700 4750 60  0000 C CNN
+F 2 "PJ-237-6A:PJ-237-6A" H 8800 4600 60  0001 C CNN
+F 3 "https://datasheet.lcsc.com/szlcsc/Korean-Hroparts-Elec-PJ-237-6A_C128992.pdf" H 7850 3850 60  0001 C CNN
+F 4 "PJ-237-6A" H 8700 4750 60  0000 C CNN "Manufacturer P/N"
+	1    8650 4600
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	8900 6350 8900 6200
+Wire Wire Line
+	8050 5250 8200 5250
+Wire Wire Line
+	8900 5250 8900 5100
+Wire Wire Line
+	8050 5050 8100 5050
+Wire Wire Line
+	8100 5050 8100 4950
+Wire Wire Line
+	8100 4950 8300 4950
+Wire Wire Line
+	8050 4700 8100 4700
+Wire Wire Line
+	8100 4700 8100 4850
+Wire Wire Line
+	8100 4850 8300 4850
+Wire Wire Line
+	8050 4500 8200 4500
+Wire Wire Line
+	8200 4500 8200 5250
+Connection ~ 8200 5250
+Wire Wire Line
+	8200 5250 8900 5250
+Wire Wire Line
+	8050 6350 8200 6350
+Wire Wire Line
+	8050 6150 8100 6150
+Wire Wire Line
+	8100 6150 8100 6050
+Wire Wire Line
+	8100 6050 8300 6050
+Wire Wire Line
+	8050 5800 8100 5800
+Wire Wire Line
+	8100 5800 8100 5950
+Wire Wire Line
+	8100 5950 8300 5950
+Wire Wire Line
+	8050 5600 8200 5600
+Wire Wire Line
+	8200 5600 8200 6350
+Connection ~ 8200 6350
+Wire Wire Line
+	8200 6350 8900 6350
 $EndSCHEMATC
