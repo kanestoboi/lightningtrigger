@@ -5,6 +5,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <StateMachine.h>
+#include <SoftwareSerial.h>// import the serial library
+
 
 #define OLED_RESET 4
 
@@ -25,7 +27,11 @@ int soundThreshold = 761;       // Threshold for sound to trigger camera
 int lightningThreshold = 1000;  // Threshold for light to trigger camera
 int numberOfTriggers = 0;       // Total times the camera has been triggered
 volatile int output = 0;        // the continious filtered ADC reading used to update the threshold
-volatile int adcCompleteFlag = 0; 
+volatile int adcCompleteFlag = 0;
+int rx = 10;  // software serial RX pin
+int tx = 11;  // software serial TX pin 
+volatile bool interruptFlag = false;
+volatile char message;
 
 // masks used
 int cameraTriggerMask = 0b00000011; // PORT B Mask
@@ -47,9 +53,15 @@ State* S1 = machine.addState(&soundMode);
 State* S4 = machine.addState(&state4);
 State* S5 = machine.addState(&state5);
 */
+
+SoftwareSerial Bluetooth(10, 11); // RX, TX
+
 void setup() {
   Serial.begin(9600);
+  Bluetooth.begin(9600);  // Begin the bluetooth serial and set data rate
   Wire.begin();
+
+  Bluetooth.println("Bluetooth connected");
 
   ADCSetup(); // Setup registers for ADC
 
@@ -81,6 +93,8 @@ void setup() {
 
   createTransitions();    // setup state transitions
 
+  attachInterrupt(0,bluetoothISR,  RISING); // setup interrupt for INT0 (UNO pin 2)
+
 
   //delay(4000);
   
@@ -97,6 +111,7 @@ void loop() {
   calibrateThreshold();
 
   runTrigger();
+  Serial.println("exited runTrigger()");
   
 }
 
@@ -142,6 +157,11 @@ ISR(ADC_vect){
     ADCSRA |= B01000000;  // Set ADSC in ADCSRA (0x7A) to start another ADC conversion
   }
   //update the threshold
+}
+
+void bluetoothISR(){
+  interruptFlag = true; // trigger flag indicating a message was received 
+  message = Bluetooth.read();  // read the messgage
 }
 
 void setSoundSensitivity(int val) {
@@ -232,6 +252,12 @@ void runTrigger() {
   display.setCursor(0,0);
   display.println(counter);
   display.display(); */
+
+    // if bluetooth interrupt has occured
+    if (interruptFlag && message == 'e') {
+      interruptFlag = false;  // clear the interrupt trigger flag
+      break
+    }
   
     if (trigger == true) {
       if ((ADMUX & 0b00000001) == 0)  // if lightning trigger mode trigger camera
@@ -255,7 +281,6 @@ void runTrigger() {
     if (adcCompleteFlag == 1) {
       threshold = output + sensitivity;
 
-      
       display.clearDisplay();
       display.fillRect(60, 20, 70, 20, BLACK);
       display.setCursor(60,20);
@@ -266,6 +291,9 @@ void runTrigger() {
 
       ADCSRA |= B01000000;  // kick off next ADC conversion
     }
+
+    while (trigger == true); // wait for last ADC to complete
+      trigger = false;  // reset trigger flag
 
     
     //display.clearDisplay();
