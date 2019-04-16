@@ -6,6 +6,7 @@
 #include <Adafruit_SSD1306.h>
 #include <StateMachine.h>
 #include <SoftwareSerial.h>// import the serial library
+#include "Timelapse.h"
 
 
 #define OLED_RESET 4
@@ -14,8 +15,10 @@
 
 long counter = 0; // debugging counter
 
+// Create various objects
 Adafruit_SSD1306 display(OLED_RESET);   // create LCD object
 StateMachine machine = StateMachine();  // Create state machine object
+Timelapse timelapse = Timelapse();
 
 
 long lastMillis = millis();
@@ -256,7 +259,7 @@ void runTrigger() {
     // if bluetooth interrupt has occured
     if (interruptFlag && message == 'e') {
       interruptFlag = false;  // clear the interrupt trigger flag
-      break
+      break;
     }
   
     if (trigger == true) {
@@ -366,9 +369,14 @@ void lightningMode() {
 }
 
 void soundMode() {
-  Serial.println(soundThreshold);
+  Serial.println("Sound Mode");
   if (getKeyPress() == 'c')
     runTrigger();
+}
+
+void timelapseMode() {
+  Serial.println("Timelapse Mode");
+  
 }
 
 void createTransitions() {
