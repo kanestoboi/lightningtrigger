@@ -4,15 +4,25 @@
 //  Created by Kane Stoboi on 16/04/2019.
 //  Copyright © 2016 Kane Stoboi. All rights reserved.
 //
-
+#include <Arduino.h>
 #include "Timelapse.h"
 
-Timelapse::Timelapse()
-{
+Timelapse::Timelapse() {
     frameRate = 24;         // the frame rate used for calculation of the edited time lapse (Frames Per Second)
     exposureTime = 1.00;    // Time that shutter is open for                     (seconds)
     delayBetweenShots = 1;  // The time in seconds between photos
     timelapseTime = 60;     // total time in seconds to be taking photos
+}
+
+Timelapse::Timelapse(void (*trigger)(), void (*release)()) {
+    frameRate = 24;         // the frame rate used for calculation of the edited time lapse (Frames Per Second)
+    exposureTime = 1.00;    // Time that shutter is open for                     (seconds)
+    delayBetweenShots = 1;  // The time in seconds between photos
+    timelapseTime = 60;     // total time in seconds to be taking photos
+    photosTaken = 0;
+    
+    this->triggerCamera = trigger;
+    this->releaseCamera = release;
 }
 
 
@@ -22,8 +32,7 @@ Timelapse::Timelapse()
  @param time: time in seconds before all photos are taken
  @return
  */
-void Timelapse::setTimelapseTime(int time)
-{
+void Timelapse::setTimelapseTime(int time) {
     timelapseTime = time;
         
     calculateEditedTimeLapseLength();
@@ -37,8 +46,7 @@ void Timelapse::setTimelapseTime(int time)
  @param void
  @return the exposure time currently set in seconds
  */
-float Timelapse::getExposure()
-{
+float Timelapse::getExposure() {
     return exposureTime;//
 }
 
@@ -48,8 +56,7 @@ float Timelapse::getExposure()
  @param exposure is the exposure to be set in seconds
  @return void
  */
-void Timelapse::setExposure(float exposure)
-{
+void Timelapse::setExposure(float exposure) {
     exposureTime = exposure;
     
 }
@@ -60,8 +67,7 @@ void Timelapse::setExposure(float exposure)
  @param void
  @return the length of the edited time lapse
  */
-long Timelapse::getEditedTimeLapseLength()
-{
+long Timelapse::getEditedTimeLapseLength() {
     calculateEditedTimeLapseLength();
     return editedTimeLapseLength;
 }
@@ -72,8 +78,7 @@ long Timelapse::getEditedTimeLapseLength()
  @param FPS 1 to increase the frame rate to the next
  @return void
  */
-void Timelapse::setFrameRate(int FPS)
-{
+void Timelapse::setFrameRate(int FPS) {
     if (FPS == 1) {
         if (frameRate == 24) {
             frameRate = 25;
@@ -122,44 +127,53 @@ void Timelapse::setFrameRate(int FPS)
     
 }
 
-int Timelapse::getFrameRate()
-{
+int Timelapse::getFrameRate() {
     return frameRate;
 }
 
-void Timelapse::calculateTotalPhotos()
-{
+void Timelapse::calculateTotalPhotos() {
     totalPhotos = (long)((((float)(timelapseTime))*60.0/(exposureTime+((float)(delayBetweenShots)))));
 }
 
-long Timelapse::getTotalPhotos()
-{
+long Timelapse::getTotalPhotos() {
     totalPhotos = (long)((((float)(timelapseTime))*60.0/(exposureTime+((float)(delayBetweenShots)))));
     return totalPhotos;
 }
 
-void Timelapse::calculateEditedTimeLapseLength()
-{
+void Timelapse::calculateEditedTimeLapseLength() {
     editedTimeLapseLength = (long)(((float)(timelapseTime))*60.0/(float)(frameRate)/(exposureTime+(float)(delayBetweenShots)));
 }
 
-int Timelapse::getDelayBetweenShots()
-{
+int Timelapse::getDelayBetweenShots() {
     return delayBetweenShots;
 }
 
-void Timelapse::setDelayBetweenShots(int time)
-{
+void Timelapse::setDelayBetweenShots(int time) {
     delayBetweenShots = time;
 }
 
-bool Timelapse::isDone()
-{
+bool Timelapse::isDone() {
     return (totalPhotos == photosTaken);
 }
 
-void Timelapse::run()
-{
-    if ((millis() - lastPhotoMillis) > delayBetweenShots * 1000)
-      
+void Timelapse::reset() {
+  photosTaken = 0;
+}
+
+void Timelapse::run() {
+    if ((millis() - lastPhotoMillis) > delayBetweenShots * 1000 && cameraTriggered == false) {
+      triggerCamera();
+      cameraTriggered = true;
+      photosTaken++;
+      triggeredMillis = millis();
+    }
+    else if (cameraTriggered = true) {
+      if (millis() - triggeredMillis > exposureTime) {
+        releaseCamera();
+        lastPhotoMillis = millis();
+        
+      }
+        
+
+    }
 }

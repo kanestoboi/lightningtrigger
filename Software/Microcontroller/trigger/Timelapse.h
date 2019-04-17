@@ -16,6 +16,7 @@ class Timelapse
   public:
     
     Timelapse();
+    Timelapse(void (*trigger)(), void (*release)());
     
     int getTimelapseTime();
     void setTimelapseTime(int time);
@@ -36,7 +37,11 @@ class Timelapse
     
     void calculateEditedTimeLapseLength();
 
+    void (*triggerCamera)();
+    void (*releaseCamera)();
+
     void run();
+    void reset();
     bool isDone();
     
 
@@ -49,8 +54,10 @@ class Timelapse
     int totalPhotos;
     int photosTaken;
     long lastPhotoMillis = 0;
+    long triggeredMillis = 0;
     int delayBetweenShots;
-    bool timelapseComplete = false;
+    bool cameraTriggered = false;
+    
 
 };
 #endif /* TimeLapse_hpp */

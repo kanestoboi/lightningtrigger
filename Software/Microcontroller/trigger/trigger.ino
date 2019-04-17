@@ -8,6 +8,9 @@
 #include <SoftwareSerial.h>// import the serial library
 #include "Timelapse.h"
 
+void triggerCamera();
+void releaseCamera();
+
 
 #define OLED_RESET 4
 
@@ -18,7 +21,7 @@ long counter = 0; // debugging counter
 // Create various objects
 Adafruit_SSD1306 display(OLED_RESET);   // create LCD object
 StateMachine machine = StateMachine();  // Create state machine object
-Timelapse timelapse = Timelapse();
+Timelapse timelapse = Timelapse(&triggerCamera, &releaseCamera);
 
 
 long lastMillis = millis();
@@ -240,7 +243,7 @@ void runTrigger() {
 
   
   if ((ADMUX & 0b00000001) == 1) {
-    PORTB |= cameraTriggerMask;
+    triggerCamera();
   }
 
 
@@ -263,8 +266,11 @@ void runTrigger() {
     }
   
     if (trigger == true) {
-      if ((ADMUX & 0b00000001) == 0)  // if lightning trigger mode trigger camera
+      if ((ADMUX & 0b00000001) == 0) {  // if lightning trigger mode trigger camera
         triggerCamera();
+        _delay_ms(100);
+        releaseCamera();
+      }
       else if ((ADMUX & 0b00000001) == 1) {  // if sound mode trigger flash
         triggerFlash();
       }
@@ -308,10 +314,11 @@ void runTrigger() {
 }
 
 void triggerCamera() {
-  PORTB |= cameraTriggerMask;  // trigger the outputs
-  _delay_ms(100);
+  PORTB |= cameraTriggerMask;  // trigger the outputs  
+}
+
+void releaseCamera() {
   PORTB = 0b00000000;   // reset trigger outputs to off
-  
 }
 
 void triggerFlash() {
@@ -376,7 +383,10 @@ void soundMode() {
 
 void timelapseMode() {
   Serial.println("Timelapse Mode");
-  
+  timelapse.reset();
+  while (!timelapse.isDone()) {
+    timelapse.run();
+  }
 }
 
 void createTransitions() {
