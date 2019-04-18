@@ -18,7 +18,7 @@ Timelapse::Timelapse(void (*trigger)(), void (*release)()) {
     frameRate = 24;         // the frame rate used for calculation of the edited time lapse (Frames Per Second)
     exposureTime = 1.00;    // Time that shutter is open for                     (seconds)
     delayBetweenShots = 1;  // The time in seconds between photos
-    timelapseTime = 60;     // total time in seconds to be taking photos
+    timelapseTime = 20;     // total time in seconds to be taking photos
     photosTaken = 0;
 
     calculateTotalPhotos();
@@ -135,7 +135,7 @@ int Timelapse::getFrameRate() {
 }
 
 void Timelapse::calculateTotalPhotos() {
-    totalPhotos = (long)((((float)(timelapseTime))*60.0/(exposureTime+((float)(delayBetweenShots)))));
+    totalPhotos = (long)((((float)(timelapseTime))/(exposureTime+((float)(delayBetweenShots)))));
 }
 
 long Timelapse::getTotalPhotos() {
@@ -165,17 +165,17 @@ void Timelapse::reset() {
 
 void Timelapse::run() {
   static bool initialRun = true;
-  Serial.println(cameraTriggered);
-    if (((millis() - lastPhotoMillis) > (delayBetweenShots * 1000) + long(exposureTime * 1000.0)) && cameraTriggered == false || initialRun) {
+  Serial.println(millis() - lastPhotoMillis);
+    if (((millis() - lastPhotoMillis) > (delayBetweenShots * 1000)) && cameraTriggered == false || initialRun) {
       this->triggerCamera();
       cameraTriggered = true;
-      photosTaken++;
       triggeredMillis = millis();
       initialRun = false;
     }
     else if (cameraTriggered == true) {
       if (millis() - triggeredMillis > long(exposureTime * 1000.0)) {
         this->releaseCamera();
+        photosTaken++;
         cameraTriggered = false;
         lastPhotoMillis = millis();        
       }

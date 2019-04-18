@@ -387,6 +387,9 @@ void timelapseMode() {
   while (!timelapse.isDone()) {
     timelapse.run();
   }
+  Serial.println("Done!");
+  while(1);
+  
 }
 
 void createTransitions() {
