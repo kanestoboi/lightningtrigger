@@ -20,9 +20,12 @@ Timelapse::Timelapse(void (*trigger)(), void (*release)()) {
     delayBetweenShots = 1;  // The time in seconds between photos
     timelapseTime = 60;     // total time in seconds to be taking photos
     photosTaken = 0;
+
+    calculateTotalPhotos();
     
     this->triggerCamera = trigger;
     this->releaseCamera = release;
+
 }
 
 
@@ -161,19 +164,21 @@ void Timelapse::reset() {
 }
 
 void Timelapse::run() {
-    if ((millis() - lastPhotoMillis) > delayBetweenShots * 1000 && cameraTriggered == false) {
-      triggerCamera();
+  static bool initialRun = true;
+  Serial.println(cameraTriggered);
+    if (((millis() - lastPhotoMillis) > (delayBetweenShots * 1000) + long(exposureTime * 1000.0)) && cameraTriggered == false || initialRun) {
+      this->triggerCamera();
       cameraTriggered = true;
       photosTaken++;
       triggeredMillis = millis();
+      initialRun = false;
     }
-    else if (cameraTriggered = true) {
-      if (millis() - triggeredMillis > exposureTime) {
-        releaseCamera();
-        lastPhotoMillis = millis();
-        
+    else if (cameraTriggered == true) {
+      if (millis() - triggeredMillis > long(exposureTime * 1000.0)) {
+        this->releaseCamera();
+        cameraTriggered = false;
+        lastPhotoMillis = millis();        
       }
-        
-
     }
+
 }

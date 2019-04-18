@@ -112,11 +112,11 @@ void loop() {
   
   //getKeyPress();
   
-  setupLightningMode();
+  //setupLightningMode();
   //setupSoundMode();
-  calibrateThreshold();
-
-  runTrigger();
+  //calibrateThreshold();
+  timelapseMode();
+  //runTrigger();
   Serial.println("exited runTrigger()");
   
 }

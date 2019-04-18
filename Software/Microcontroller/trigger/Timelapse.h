@@ -55,7 +55,8 @@ class Timelapse
     int photosTaken;
     long lastPhotoMillis = 0;
     long triggeredMillis = 0;
-    int delayBetweenShots;
+    long delayMillis = 0;
+    long delayBetweenShots;
     bool cameraTriggered = false;
     
 
