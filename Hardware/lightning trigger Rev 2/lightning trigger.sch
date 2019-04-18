@@ -1205,8 +1205,6 @@ F 3 "" H 6850 1300 50  0001 C CNN
 	1    6850 1300
 	1    0    0    -1  
 $EndComp
-Text GLabel 650  4600 0    50   Input ~ 0
-VIN
 Text GLabel 2000 6050 2    50   Input ~ 0
 VIN
 $Comp
@@ -1940,17 +1938,6 @@ Text GLabel 1500 6950 1    50   Input ~ 0
 VUSB
 Text GLabel 5100 5850 2    45   Input ~ 0
 VUSB
-$Comp
-L power:+BATT #PWR010
-U 1 1 5CF9BB53
-P 5350 6050
-F 0 "#PWR010" H 5350 5900 50  0001 C CNN
-F 1 "+BATT" H 5350 6190 50  0000 C CNN
-F 2 "" H 5350 6050 50  0001 C CNN
-F 3 "" H 5350 6050 50  0001 C CNN
-	1    5350 6050
-	-1   0    0    1   
-$EndComp
 Text GLabel 5550 5950 2    50   Input ~ 0
 POWER_MUX_OUT
 $Comp
@@ -2007,8 +1994,6 @@ Wire Wire Line
 Wire Wire Line
 	3950 6500 4150 6500
 Connection ~ 4150 6500
-Text GLabel 1250 6150 0    50   Input ~ 0
-POWER_MUX_OUT
 $Comp
 L power:VDD #PWR09
 U 1 1 5D009946
@@ -2100,4 +2085,23 @@ Wire Wire Line
 Connection ~ 6450 2700
 Wire Wire Line
 	7000 2700 6450 2700
+$Comp
+L power:+BATT #PWR?
+U 1 1 5D2369AE
+P 1250 6150
+F 0 "#PWR?" H 1250 6000 50  0001 C CNN
+F 1 "+BATT" H 1250 6290 50  0000 C CNN
+F 2 "" H 1250 6150 50  0001 C CNN
+F 3 "" H 1250 6150 50  0001 C CNN
+	1    1250 6150
+	0    -1   -1   0   
+$EndComp
+Text GLabel 5350 6050 2    50   Input ~ 0
+VIN
+Text GLabel 650  4600 0    50   Input ~ 0
+POWER_MUX_OUT
+Text GLabel 6900 2600 0    50   Input ~ 0
+STAT
+Wire Wire Line
+	6900 2600 7000 2600
 $EndSCHEMATC
