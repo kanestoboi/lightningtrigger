@@ -7,6 +7,7 @@
 #include <StateMachine.h>
 #include <SoftwareSerial.h>// import the serial library
 #include "Timelapse.h"
+#include "ThresholdTrigger.h"
 
 void triggerCamera();
 void releaseCamera();
@@ -21,7 +22,10 @@ long counter = 0; // debugging counter
 // Create various objects
 Adafruit_SSD1306 display(OLED_RESET);   // create LCD object
 StateMachine machine = StateMachine();  // Create state machine object
+
 Timelapse timelapse = Timelapse(&triggerCamera, &releaseCamera);
+ThresholdTrigger thresholdTrigger = ThresholdTrigger(&triggerCamera, &releaseCamera);
+
 
 
 long lastMillis = millis();
@@ -69,7 +73,7 @@ void setup() {
 
   Bluetooth.println("Bluetooth connected");
 
-  ADCSetup(); // Setup registers for ADC
+  thresholdTrigger.setup(); // Setup registers for ADC
 
   setSoundSensitivity(0);       // sets default sensitivity 
   setLightningSensitivity(128); // sets default sensitivity
@@ -100,6 +104,7 @@ void setup() {
   createTransitions();    // setup state transitions
 
   attachInterrupt(0,bluetoothISR,  RISING); // setup interrupt for INT0 (UNO pin 2)
+ 
   
 
 
@@ -116,54 +121,12 @@ void loop() {
   //setupLightningMode();
   //setupSoundMode();
   //calibrateThreshold();
-  timelapseMode();
+  //timelapseMode();
+  
+  lightningMode();
   //runTrigger();
   Serial.println("exited runTrigger()");
   
-}
-
-void ADCSetup() {
-  // clear ADLAR in ADMUX (0x7C) to right-adjust the result
-  // ADCL will contain lower 8 bits, ADCH upper 2 (in last two bits)
-  ADMUX &= B11011111;
-  
-  // Set REFS1 and REFS0 in ADMUX (bit 7 and 6) to change reference voltage to the
-  // AVCC with external capacitor at the AREF pin is used as VRef
-  ADMUX |= B01000000;
-  
-  // Clear MUX3..0 in ADMUX (0x7C) in preparation for setting the analog
-  // input
-  ADMUX &= B11110000;
-
-  // Set the Prescaler to 128 (16000KHz/128 = 125KHz)
-  // Above 200KHz 10-bit results are not reliable.
-  ADCSRA = B00000111;
-
-  // Set ADIE in ADCSRA (0x7A) to enable the ADC interrupt.
-  // Without this, the internal interrupt will not trigger.
-  ADCSRA |= B00001000;
-  
-  // Set ADEN in ADCSRA (0x7A) to enable the ADC.
-  // Note, this instruction takes 12 ADC clocks to execute
-  ADCSRA |= B10000000;
-  
-  // Set ACME high for multiplexer to select negative input of analogue comparator
-  ADCSRB &= B01000000;
-}
-
-// Interrupt service routine for the ADC completion
-ISR(ADC_vect){
-  adcCompleteFlag = 1;
-  analogVal = ADCL | (ADCH << 8); // Must read low byte first
-  output = int(0.505*(float)output + 0.495*(float)analogVal);
-  //Serial.println(analogVal);
-  if (analogVal >= threshold){
-    trigger = true;
-  }
-  else {
-    ADCSRA |= B01000000;  // Set ADSC in ADCSRA (0x7A) to start another ADC conversion
-  }
-  //update the threshold
 }
 
 void bluetoothISR(){
@@ -188,13 +151,13 @@ void setLightningSensitivity(int val) {
 }
 
 void setupSoundMode() {
-  ADMUX |= 1; // Set multiplexer to 1
-  threshold = soundThreshold;
+  thresholdTrigger.setADCInput(1);
+  thresholdTrigger.setTriggerThreshold(soundThreshold);
 }
 
 void setupLightningMode() {
-  ADMUX |= 0; // Set multiplexer to 0
-  threshold = lightningThreshold;
+  thresholdTrigger.setADCInput(0); // Set multiplexer to 0
+  thresholdTrigger.setTriggerThreshold(lightningThreshold);
 }
 
 void calibrateThreshold() {
@@ -204,22 +167,7 @@ void calibrateThreshold() {
   display.setCursor(0,0);
   display.println("Calibrating");
 */
-  ADCSRA |= B01000000;
   
-  while (1) {
-    if (adcCompleteFlag == 1) {
-      if (output == threshold){
-        threshold = threshold + 10;
-        adcCompleteFlag = 0;
-        trigger = false;
-        break;
-      }
-
-      threshold = output;
-      adcCompleteFlag = 0;
-      ADCSRA |= B01000000;
-    }
-  }
 /*
   display.setCursor(60,20);
   display.println("Calibrated");
@@ -233,32 +181,17 @@ void calibrateThreshold() {
 void runTrigger() {
   sei();  // Enable global interrupts
 
-  display.clearDisplay();
-  display.display();
-  _delay_ms(1000);
-  display.setCursor(0,0);
-  display.println("Waiting for trigger");
-  display.setCursor(60,20);
-  display.println(threshold);
-  display.display();
+  
 
   
   if ((ADMUX & 0b00000001) == 1) {
     triggerCamera();
   }
-
-
+  
   delay(1000);
   ADCSRA |=B01000000; // Set ADSC in ADCSRA (0x7A) to start the ADC conversion
 
   while(true) {
-/*
-   counter++;
-  display.clearDisplay();
-  display.display();
-  display.setCursor(0,0);
-  display.println(counter);
-  display.display(); */
 
     // if bluetooth interrupt has occured
     if (BLUETOOTH_INTERRUPT_FLAG && bluetoothRxMessage == 'e') {
@@ -266,59 +199,18 @@ void runTrigger() {
       break;
     }
   
-    if (trigger == true) {
-      if ((ADMUX & 0b00000001) == 0) {  // if lightning trigger mode trigger camera
-        triggerCamera();
-        _delay_ms(100);
-        releaseCamera();
-      }
-      else if ((ADMUX & 0b00000001) == 1) {  // if sound mode trigger flash
-        triggerFlash();
-      }
-      
-      
-      _delay_ms(500);
-      numberOfTriggers++;
-      updateDisplay();
-      
-      trigger = false;
-      //adcCompleteFlag = 0;
-      calibrateThreshold();
-      ADCSRA |= B01000000;  // kick off next ADC conversion
-    }
-
-    // If the ADC is complete update the threshold
-    if (adcCompleteFlag == 1) {
-      threshold = output + sensitivity;
-
-      display.clearDisplay();
-      display.fillRect(60, 20, 70, 20, BLACK);
-      display.setCursor(60,20);
-      display.println(threshold);
-      display.display();
-      
-      adcCompleteFlag = 0;
-
-      ADCSRA |= B01000000;  // kick off next ADC conversion
-    }
-
-    while (trigger == true); // wait for last ADC to complete
-      trigger = false;  // reset trigger flag
-
     
-    //display.clearDisplay();
-    display.fillRect(0, 10, 32, 10, BLACK);
-    display.setCursor(0,10);
-    display.println(analogVal);
-    display.display();
   }
+
+  while (trigger == false); // wait for last ADC to complete
+      trigger = false;  // reset trigger flag
 }
 
-void triggerCamera() {
+static void triggerCamera() {
   PORTB |= cameraTriggerMask;  // trigger the outputs  
 }
 
-void releaseCamera() {
+static void releaseCamera() {
   PORTB = 0b00000000;   // reset trigger outputs to off
 }
 
@@ -371,15 +263,69 @@ char getKeyPress() {
 }
 
 void lightningMode() {
+  pinMode(A5, OUTPUT);
+  digitalWrite(A5, HIGH);
   Serial.println("Lightning Mode");
-  if (getKeyPress() == 'c')
-    runTrigger();
+  BLUETOOTH_INTERRUPT_FLAG = false; //TODO: need to find out why bluetooth flag is being triggered from above line
+  while (1) {
+    if (BLUETOOTH_INTERRUPT_FLAG) {
+      if (bluetoothRxMessage == 'r') {  // if the run time-lapse command was received from phone
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        break;
+      }
+      else {
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        return;
+      }   
+    }
+  }
+
+  thresholdTrigger.resetCalibration();
+  ADCSRA |= B01000000;
+  while(!thresholdTrigger.isCalibrated())
+    thresholdTrigger.calibrateThreshold();
+    
+  Serial.println("calibration done");
+  ADCSRA |= B01000000;
+  while(1) {
+    thresholdTrigger.run();
+
+    if (BLUETOOTH_INTERRUPT_FLAG) {
+      if (bluetoothRxMessage == 'e') {  // if the eit time-lapse command was received from phone
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        break;
+      }
+      BLUETOOTH_INTERRUPT_FLAG = false; // reset interrupt flag
+    }
+  }
 }
 
 void soundMode() {
   Serial.println("Sound Mode");
-  if (getKeyPress() == 'c')
-    runTrigger();
+  
+  display.clearDisplay();
+  display.display();
+  display.setCursor(0,0);
+  display.println("Sound Trigger Running");
+  display.display();
+
+  while (1) {
+    if (BLUETOOTH_INTERRUPT_FLAG) {
+      if (bluetoothRxMessage == 'r') {  // if the run time-lapse command was received from phone
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        break;
+      }
+      else {
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        return;
+      }   
+    }
+  }
+ 
+  while(1) {
+    thresholdTrigger.run();
+    //Serial.println(ANALOGUE_VAL);
+  }
 }
 
 void timelapseMode() {
@@ -389,19 +335,19 @@ void timelapseMode() {
   timelapse.reset();
   while (1) {
     if (BLUETOOTH_INTERRUPT_FLAG) {
-      if (bluetoothRxMessage == 'r')  // if the run time-lapse command was received from phone
+      if (bluetoothRxMessage == 'r') {  // if the run time-lapse command was received from phone
+        BLUETOOTH_INTERRUPT_FLAG = false;
         break;
+      }
       else if (bluetoothRxMessage == '1') {
         timelapse.setTimelapseTime(timelapse.getTimelapseTime() + 1);
         Bluetooth.println(timelapse.getTimelapseTime());
+        BLUETOOTH_INTERRUPT_FLAG = false;
       }
       else {
         BLUETOOTH_INTERRUPT_FLAG = false;
         return;
-      }
-        
-
-      BLUETOOTH_INTERRUPT_FLAG = false;
+      }     
     }  
   }
   
@@ -410,6 +356,7 @@ void timelapseMode() {
     if (BLUETOOTH_INTERRUPT_FLAG) {
       if (bluetoothRxMessage == 'e') {  // if the eit time-lapse command was received from phone
         timelapse.end();
+        BLUETOOTH_INTERRUPT_FLAG = false;
         break;
       }
       BLUETOOTH_INTERRUPT_FLAG = false; // reset interrupt flag
