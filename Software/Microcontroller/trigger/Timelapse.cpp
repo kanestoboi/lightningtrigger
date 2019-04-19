@@ -89,7 +89,6 @@ void Timelapse::reset() {
 
 void Timelapse::run() {
   static bool initialRun = true;
-  Serial.println(millis() - lastPhotoMillis);
     if (((millis() - lastPhotoMillis) > (delayBetweenShots * 1000)) && cameraTriggered == false || initialRun) {
       this->triggerCamera();
       cameraTriggered = true;
