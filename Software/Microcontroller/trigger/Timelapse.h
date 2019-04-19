@@ -14,50 +14,33 @@ class Timelapse
 {
     
   public:
-    
-    Timelapse();
-    Timelapse(void (*trigger)(), void (*release)());
-    
-    int getTimelapseTime();
-    void setTimelapseTime(int time);
-    
-    float getExposure();
-    void setExposure(float exposure);
-    
-    void setFrameRate(int direction);
-    int getFrameRate();
-    
-    int getDelayBetweenShots();
-    void setDelayBetweenShots(int time);
-    
-    long getEditedTimeLapseLength();
+    // constructor, requires two pointers to the shutter and release functions
+    Timelapse(void (*triggerFunction)(), void (*releaseFunction)());
 
+    // Function prototypes
+    void setTimelapseTime(long time);
+    int getTimelapseTime();
+    void setExposure(float exposure);
+    float getExposure();
+    void setDelayBetweenShots(int time);
+    int getDelayBetweenShots();
     void calculateTotalPhotos();
     long getTotalPhotos();
-    
-    void calculateEditedTimeLapseLength();
-
-    void (*triggerCamera)();
-    void (*releaseCamera)();
-
-    void run();
+    void (*triggerCamera)();  // pointer to function that will trigger the camera to open the shutter
+    void (*releaseCamera)();  // pointer to function that will release the camera shutter
+    void run();      
     void reset();
     bool isDone();
     
-
   private:
-    
-    int timelapseTime; // Time for pan to travel from zero to end                     (minutes)
-    int frameRate;      // the frame rate used for calculation of the edited time lapse (Frames Per Second)
-    long editedTimeLapseLength; // length of the edited time lapse              (seconds)
-    float exposureTime;  // Time that shutter is closed for                     (seconds)
-    int totalPhotos;
-    int photosTaken;
-    long lastPhotoMillis = 0;
-    long triggeredMillis = 0;
-    long delayMillis = 0;
-    long delayBetweenShots;
-    bool cameraTriggered = false;
+    long timelapseTime;         // Time for pan to travel from zero to end (minutes)
+    float exposureTime;         // Time that shutter is closed for              (seconds)
+    int totalPhotos;            // Total photos that need to be taken to complete the timelapse
+    int photosTaken;            // total photos that have already been taken durinig the timelapse
+    long lastPhotoMillis = 0;   // the time since the start of program that the last photo was taken
+    long triggeredMillis = 0;   // time since the start of program that the camera was triggered
+    long delayBetweenShots;     // the delay between the release of shutter to trigger of shutter
+    bool cameraTriggered = false; // is the camera currently triggered?
     
 
 };
