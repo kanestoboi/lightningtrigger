@@ -36,8 +36,8 @@ volatile int output = 0;        // the continious filtered ADC reading used to u
 volatile int adcCompleteFlag = 0;
 int rx = 10;  // software serial RX pin
 int tx = 11;  // software serial TX pin 
-volatile bool interruptFlag = false;
-volatile char message;
+volatile bool BLUETOOTH_INTERRUPT_FLAG = false;
+volatile char bluetoothRxMessage;
 
 // masks used
 int cameraTriggerMask = 0b00000011; // PORT B Mask
@@ -60,7 +60,7 @@ State* S4 = machine.addState(&state4);
 State* S5 = machine.addState(&state5);
 */
 
-SoftwareSerial Bluetooth(10, 11); // RX, TX
+SoftwareSerial Bluetooth(3, 4); // RX, TX
 
 void setup() {
   Serial.begin(9600);
@@ -76,16 +76,16 @@ void setup() {
 
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
   display.clearDisplay();   // clear the adafruit splash screen
-
+  
   /**********************************
    * THERE IS A BUG IN THE DISPLAY.BEGIN FUNCTION CAUSING PD4 TO BE SET HIGH
    * THE WORK AROUND BELOW SETS ALL PINS LOW BEFORE SETTING THEM AS INPUTS
    **********************************/
   DDRB = DDRB | 0b00001111; // set focus and shutter pins to be outputs
-  DDRD = 0b00000000;
-  PORTD = 0b00000000;
-  DDRD = DDRD | switchesMask; // set the 5-way switch pins to be inputs
-  
+  //DDRD = 0b00000000;
+  //PORTD = 0b00000000;
+  //DDRD = DDRD | switchesMask; // set the 5-way switch pins to be inputs
+
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
@@ -100,6 +100,7 @@ void setup() {
   createTransitions();    // setup state transitions
 
   attachInterrupt(0,bluetoothISR,  RISING); // setup interrupt for INT0 (UNO pin 2)
+  
 
 
   //delay(4000);
@@ -166,8 +167,8 @@ ISR(ADC_vect){
 }
 
 void bluetoothISR(){
-  interruptFlag = true; // trigger flag indicating a message was received 
-  message = Bluetooth.read();  // read the messgage
+  BLUETOOTH_INTERRUPT_FLAG = true; // trigger flag indicating a bluetoothRxMessage was received 
+  bluetoothRxMessage = Bluetooth.read();  // read the messgage
 }
 
 void setSoundSensitivity(int val) {
@@ -260,8 +261,8 @@ void runTrigger() {
   display.display(); */
 
     // if bluetooth interrupt has occured
-    if (interruptFlag && message == 'e') {
-      interruptFlag = false;  // clear the interrupt trigger flag
+    if (BLUETOOTH_INTERRUPT_FLAG && bluetoothRxMessage == 'e') {
+      BLUETOOTH_INTERRUPT_FLAG = false;  // clear the interrupt trigger flag
       break;
     }
   
@@ -382,13 +383,43 @@ void soundMode() {
 }
 
 void timelapseMode() {
-  Serial.println("Timelapse Mode");
+  
+  Bluetooth.println("Timelapse Mode");
+  BLUETOOTH_INTERRUPT_FLAG = false;   //TODO: need to find out why bluetooth flag is being triggered from above line
   timelapse.reset();
+  while (1) {
+    if (BLUETOOTH_INTERRUPT_FLAG) {
+      if (bluetoothRxMessage == 'r')  // if the run time-lapse command was received from phone
+        break;
+      else if (bluetoothRxMessage == '1') {
+        timelapse.setTimelapseTime(timelapse.getTimelapseTime() + 1);
+        Bluetooth.println(timelapse.getTimelapseTime());
+      }
+      else {
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        return;
+      }
+        
+
+      BLUETOOTH_INTERRUPT_FLAG = false;
+    }  
+  }
+  
   while (!timelapse.isDone()) {
     timelapse.run();
+    if (BLUETOOTH_INTERRUPT_FLAG) {
+      if (bluetoothRxMessage == 'e') {  // if the eit time-lapse command was received from phone
+        timelapse.end();
+        break;
+      }
+      BLUETOOTH_INTERRUPT_FLAG = false; // reset interrupt flag
+    }
   }
-  Serial.println("Done!");
-  while(1);
+  
+  if (timelapse.isDone())
+    Bluetooth.println("Complete");
+  else 
+    Bluetooth.println("Exited");
   
 }
 
