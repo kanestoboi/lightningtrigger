@@ -6,8 +6,8 @@
 //  Copyright © 2016 Kane Stoboi. All rights reserved.
 //
 
-#ifndef TimeLapse_hpp
-#define TimeLapse_hpp
+#ifndef Timelapse_h
+#define Timelapse_h
 
 class Timelapse
 {
