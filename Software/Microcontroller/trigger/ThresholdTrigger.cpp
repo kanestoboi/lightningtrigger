@@ -114,8 +114,6 @@ void ThresholdTrigger::end() {
   this->releaseCamera();
 }
 
-
-
 void ThresholdTrigger::run() {
 
   if (THRESHOLD_TRIGGER_FLAG == true) {
