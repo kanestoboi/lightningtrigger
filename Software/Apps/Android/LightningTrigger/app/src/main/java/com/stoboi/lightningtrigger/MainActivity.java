@@ -215,9 +215,14 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction();
             if(BluetoothDevice.ACTION_FOUND.equals(action)){
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                // add the name to the list
-                mBTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
-                mBTArrayAdapter.notifyDataSetChanged();
+                String itemInfo = device.getName() + "\n" + device.getAddress();
+
+                // Check the list if the device has already been discovered
+                if ((String.valueOf(mBTArrayAdapter.getPosition(itemInfo))).equals("-1")) {
+                    // add the name to the list
+                    mBTArrayAdapter.add(itemInfo);
+                    mBTArrayAdapter.notifyDataSetChanged();
+                }
             }
         }
     };
