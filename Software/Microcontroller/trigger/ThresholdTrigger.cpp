@@ -92,11 +92,11 @@ int ThresholdTrigger::analogVal() {
 }
 
 int ThresholdTrigger::getNumberOfTriggers() {
-  return numberOfTriggers;
+  return this->numberOfTriggers;
 }
 
 int ThresholdTrigger::getThreshold() {
-  return triggerThreshold;
+  return THRESHOLD_TRIGGER_THRESHOLD;
 }
 
 void ThresholdTrigger::setADCInput(int input) {
@@ -107,6 +107,7 @@ void ThresholdTrigger::setADCInput(int input) {
 void ThresholdTrigger::setTriggerThreshold(int threshold) {
   if (threshold >= 0 && threshold <= 1023)
     triggerThreshold = threshold; // Set triggering threshold 
+    
 }
 
 
@@ -121,7 +122,7 @@ void ThresholdTrigger::run() {
       if ((ADMUX & 0b00000001) == 0) {  // if lightning trigger mode trigger camera
         Serial.println("Triggered");
         this->triggerCamera();
-        _delay_ms(100);
+        _delay_ms(200);
         this->releaseCamera();
       }
       else if ((ADMUX & 0b00000001) == 1) {  // if sound mode trigger flash
