@@ -7,20 +7,21 @@
 #include <SoftwareSerial.h>// import the serial library
 #include "Timelapse.h"
 #include "ThresholdTrigger.h"
+#include "BatteryIndicator.h"
 
 void triggerCamera();
 void releaseCamera();
 
-volatile bool BLUETOOTH_INTERRUPT_FLAG = true;
+volatile bool BLUETOOTH_INTERRUPT_FLAG;
 
-volatile char bluetoothRxMessage = 'r';
+volatile char bluetoothRxMessage;
 
 /*********************************
  * DEVELOPMENT SETUP
  ********************************/
 
-int rx = 3;  // software serial RX pin
-int tx = 4;  // software serial TX pin 
+int rx = 2;  // software serial RX pin
+int tx = 3;  // software serial TX pin 
 long counter = 0; // debugging counter
 
 
@@ -40,16 +41,18 @@ Adafruit_SSD1306 display(OLED_RESET);   // create LCD object
 SoftwareSerial Bluetooth(rx, tx);       // create bluetooth object
 Timelapse timelapse = Timelapse(&triggerCamera, &releaseCamera);
 ThresholdTrigger thresholdTrigger = ThresholdTrigger(&triggerCamera, &releaseCamera);
+BatteryIndicator batteryIndicator = BatteryIndicator(7);
 
-
+// Variables
 int lightningThreshold = 1000;  // Threshold for light to trigger camera
 int soundThreshold = 740;
+uint8_t batteryLevel = 0;
 
 // Various Flags
 
 
 // masks used
-int cameraTriggerMask = 0b00000011; // PORT B Mask
+int cameraTriggerMask = 0b00000010; // PORT B Mask
 int flashTriggerMask = 0b00001100;  // PORT B Mask
 int switchesMask = 0b01111100;
 int downMask = 0b00000100;
@@ -65,13 +68,10 @@ void setup() {
 
   Bluetooth.println("Bluetooth connected");
 
-  thresholdTrigger.setup(); // Setup registers for ADC
-
-  setSoundSensitivity(0);       // sets default sensitivity 
-  setLightningSensitivity(128); // sets default sensitivity
-
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
-  display.clearDisplay();   // clear the adafruit splash screen
+  //setSoundSensitivity(0);       // sets default sensitivity 
+  //setLightningSensitivity(127); // sets default sensitivity
+  //display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
+  //display.clearDisplay();   // clear the adafruit splash screen
   
   /**********************************
    * THERE IS A BUG IN THE DISPLAY.BEGIN FUNCTION CAUSING PD4 TO BE SET HIGH
@@ -81,6 +81,7 @@ void setup() {
   //DDRD = 0b00000000;
   //PORTD = 0b00000000;
   //DDRD = DDRD | switchesMask; // set the 5-way switch pins to be inputs
+  
 
   display.setTextSize(1);
   display.setTextColor(WHITE);
@@ -91,25 +92,46 @@ void setup() {
   display.println(lightningThreshold);
   display.display();
 
-  setupLightningMode();   // lightning trigger is the default mode on start up
 
-  attachInterrupt(0,bluetoothISR,  RISING); // setup interrupt for INT0 (UNO pin 2)
+  //attachInterrupt(0,bluetoothISR,  RISING); // setup interrupt for INT0 (UNO pin 2)
  
-  
 
 
   //delay(4000);
-  
+
+  timer2InterruptSetup();  
+
 }
+
+
 
 void loop() {
 
-    
+
+  if (BLUETOOTH_INTERRUPT_FLAG) {
+    if (bluetoothRxMessage == 't') {  // if the run time-lapse command was received from phone
+      BLUETOOTH_INTERRUPT_FLAG = false;
+      Bluetooth.println("tm");
+      timelapseMode();
+    }
+    else if (bluetoothRxMessage == 's') {  // if the run sound mode command was received from phone
+      BLUETOOTH_INTERRUPT_FLAG = false;
+      Bluetooth.println("sm");
+      soundMode();
+    }
+    else if (bluetoothRxMessage == 'l') {  // if the run lightning mode command was received from phone
+      BLUETOOTH_INTERRUPT_FLAG = false;
+      Bluetooth.println("lm");
+      lightningMode();
+    }
+    else {
+      BLUETOOTH_INTERRUPT_FLAG = false;
+    }   
+  }
+
   //timelapseMode();
   
-  lightningMode();
-  //runTrigger();
-  Serial.println("exited runTrigger()");
+  //lightningMode();  
   
 }
 
@@ -137,11 +159,13 @@ void setLightningSensitivity(int val) {
 void setupSoundMode() {
   thresholdTrigger.setADCInput(1);
   thresholdTrigger.setTriggerThreshold(soundThreshold);
+  thresholdTrigger.setup();
 }
 
 void setupLightningMode() {
   thresholdTrigger.setADCInput(0); // Set multiplexer to 0
   thresholdTrigger.setTriggerThreshold(lightningThreshold);
+  thresholdTrigger.setup();
 }
 
 static void triggerCamera() {
@@ -160,7 +184,7 @@ void triggerFlash() {
 
 
 void updateDisplay() {
-  display.fillRect(0, 20, 32, 20, BLACK);
+  display.clearDisplay();
   display.setCursor(0,20);
   display.println(thresholdTrigger.getNumberOfTriggers());
   display.display();
@@ -170,12 +194,10 @@ void lightningMode() {
   display.clearDisplay();
   display.display();
   display.setCursor(0,0);
-  display.println("Sound Trigger Running");
+  display.println("Lightning Trigger Mode");
   display.display();
   
   setupLightningMode();
-  pinMode(A5, OUTPUT);
-  digitalWrite(A5, HIGH);
   Serial.println("Lightning Mode");
   BLUETOOTH_INTERRUPT_FLAG = false; //TODO: need to find out why bluetooth flag is being triggered from above line
   while (1) {
@@ -195,13 +217,20 @@ void lightningMode() {
   ADCSRA |= B01000000;
   while(!thresholdTrigger.isCalibrated())
     thresholdTrigger.calibrateThreshold();
-    
+
+  display.clearDisplay();
+  display.display();
+  display.setCursor(0,0);
+  display.println("Lightning Trigger Running");
+  display.display();
   Serial.println("calibration done");
   ADCSRA |= B01000000;
   while(1) {
     thresholdTrigger.run();
     updateDisplay();
-
+    Bluetooth.print(thresholdTrigger.getNumberOfTriggers());
+    Bluetooth.print(" | ");
+    Bluetooth.println(thresholdTrigger.analogVal());
     if (BLUETOOTH_INTERRUPT_FLAG) {
       if (bluetoothRxMessage == 'e') {  // if the eit time-lapse command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
@@ -281,4 +310,28 @@ void timelapseMode() {
   else 
     Bluetooth.println("Exited");
   
+}
+
+void timer2InterruptSetup() {
+  TCCR1A = 0;// set entire TCCR1A register to 0
+  TCCR1B = 0;// same for TCCR1B
+  TCNT1  = 0;//initialize counter value to 0
+  // set compare match register for 1hz increments
+  OCR1A = 65535;// = (16*10^6) / (1*1024) - 1 (must be <65536)
+  // turn on CTC mode
+  TCCR1B |= (1 << WGM12);
+  // Set CS12 and CS10 bits for 1024 prescaler
+  TCCR1B |= (1 << CS12) | (1 << CS10);  
+  // enable timer compare interrupt
+  TIMSK1 |= (1 << OCIE1A);
+}
+
+/**********************************
+ * OVERFLOW TIMER RUNS "ASYNCHRONOUS" CODE EVERY 4 SECONDS
+ **********************************/
+ISR(TIMER1_COMPA_vect) { //timer1 interrupt 4Hz 
+  batteryLevel = batteryIndicator.getBatteryLevelPercentage();
+  Serial.print("Battery Level: ");
+  Serial.print(batteryIndicator.getBatteryLevelPercentage());
+  Serial.println("%");
 }
