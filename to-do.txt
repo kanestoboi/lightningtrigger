@@ -10,11 +10,23 @@ REV 2 HARDWARE UPDATES
 - move LCD header down so that cover can close
 - get new optoisolator (4 channel)
 - get smaller crystal
-- change lipo charger to send status to uC
+- change lipo charger to send status to uC (Still need to do uC code)
 - add automatic power switching between usb and battery to allow for uC to display battery level when charging 
 - add battery level circuitry. Will likely need a voltage reference and voltage divider.
 - charger is not working correctly when power switch is off
-- 5 way switch footprint and schematic are incorrect and needs to be re done
-- change resistors and capacitor footprints to be 0603
 - add PIR sensor
+- need to add logic conversion for HM-11
+- need to add voltage conversion for HM-11 input to 3.3V
+
+
+--------------------------
+DONE
+--------------------------
+- 5 way switch footprint and schematic are incorrect and needs to be re done - Removed 5 way switch as bluetooth will be used in rev 2- remove 5 way switch
 - remove 5 way switch
+- change resistors and capacitor footprints to be 0603
+- Find new parts for 0603 capacitors and resistors
+
+robot shop order number for HM-11
+100240701
+
