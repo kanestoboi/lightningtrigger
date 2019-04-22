@@ -68,10 +68,10 @@ void setup() {
 
   Bluetooth.println("Bluetooth connected");
 
-  //setSoundSensitivity(0);       // sets default sensitivity 
-  //setLightningSensitivity(127); // sets default sensitivity
-  //display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
-  //display.clearDisplay();   // clear the adafruit splash screen
+  setSoundSensitivity(0);       // sets default sensitivity 
+  setLightningSensitivity(127); // sets default sensitivity
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
+  display.clearDisplay();   // clear the adafruit splash screen
   
   /**********************************
    * THERE IS A BUG IN THE DISPLAY.BEGIN FUNCTION CAUSING PD4 TO BE SET HIGH
@@ -93,7 +93,7 @@ void setup() {
   display.display();
 
 
-  //attachInterrupt(0,bluetoothISR,  RISING); // setup interrupt for INT0 (UNO pin 2)
+  attachInterrupt(0,bluetoothISR,  RISING); // setup interrupt for INT0 (UNO pin 2) //TODO: Change this to real interrupt
  
 
 
@@ -106,7 +106,8 @@ void setup() {
 
 
 void loop() {
-
+  display.clearDisplay();
+  display.display();
 
   if (BLUETOOTH_INTERRUPT_FLAG) {
     if (bluetoothRxMessage == 't') {  // if the run time-lapse command was received from phone
@@ -198,12 +199,13 @@ void lightningMode() {
   display.display();
   
   setupLightningMode();
-  Serial.println("Lightning Mode");
+  Bluetooth.println("Lightning Mode");
   BLUETOOTH_INTERRUPT_FLAG = false; //TODO: need to find out why bluetooth flag is being triggered from above line
   while (1) {
     if (BLUETOOTH_INTERRUPT_FLAG) {
       if (bluetoothRxMessage == 'r') {  // if the run time-lapse command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
+        Bluetooth.println("Run Lightning Mode");
         break;
       }
       else {
@@ -218,6 +220,8 @@ void lightningMode() {
   while(!thresholdTrigger.isCalibrated())
     thresholdTrigger.calibrateThreshold();
 
+  Bluetooth.println("Calibrated  Lightning Mode");
+
   display.clearDisplay();
   display.display();
   display.setCursor(0,0);
@@ -228,9 +232,9 @@ void lightningMode() {
   while(1) {
     thresholdTrigger.run();
     updateDisplay();
-    Bluetooth.print(thresholdTrigger.getNumberOfTriggers());
-    Bluetooth.print(" | ");
-    Bluetooth.println(thresholdTrigger.analogVal());
+    //Bluetooth.print(thresholdTrigger.getNumberOfTriggers());
+    //Bluetooth.print(" | ");
+    //Bluetooth.println(thresholdTrigger.analogVal());
     if (BLUETOOTH_INTERRUPT_FLAG) {
       if (bluetoothRxMessage == 'e') {  // if the eit time-lapse command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
@@ -330,8 +334,13 @@ void timer2InterruptSetup() {
  * OVERFLOW TIMER RUNS "ASYNCHRONOUS" CODE EVERY 4 SECONDS
  **********************************/
 ISR(TIMER1_COMPA_vect) { //timer1 interrupt 4Hz 
+  
   batteryLevel = batteryIndicator.getBatteryLevelPercentage();
-  Serial.print("Battery Level: ");
-  Serial.print(batteryIndicator.getBatteryLevelPercentage());
-  Serial.println("%");
+
+  /*
+  Bluetooth.print("Battery Level: ");
+  Bluetooth.print(batteryIndicator.getBatteryLevelPercentage());
+  Bluetooth.println("%");
+  //setupLightningMode();*/
+  
 }

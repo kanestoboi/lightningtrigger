@@ -60,11 +60,15 @@ int BatteryIndicator::getBatteryLevelRaw() {
 
   while((ADCSRA & 0b01000000) != 0b00000000); // wait for previous ADC to complete
 
-  return (ADCL | (ADCH << 8)); // return the complete ADC
-
   ADMUX = this->admuxHolder;
   ADCSRA = this->adcsraHolder;
   ADCSRB = this->adcsrbHolder;
+
+  ADCSRA |= B01000000;  // kick off next ADC
+
+  return (ADCL | (ADCH << 8)); // return the complete ADC
+
+  
 }
 
 int BatteryIndicator::getBatteryLevelPercentage() {
