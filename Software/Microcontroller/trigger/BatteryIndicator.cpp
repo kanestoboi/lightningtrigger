@@ -11,8 +11,6 @@
 #include "BatteryIndicator.h"
 
 
- 
-
 BatteryIndicator::BatteryIndicator(int pin) {
   this->ADCPin = pin;
 }
