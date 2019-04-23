@@ -294,7 +294,7 @@ void soundMode() {
       BLUETOOTH_INTERRUPT_FLAG = false;
       
     }
-//    Bluetooth.print(thresholdTrigger.getThreshold());
+//    Bluetooth.print(THRESHOLD_TRIGGER_THRESHOLD);
 //    Bluetooth.print(" | ");
 //    Bluetooth.println(thresholdTrigger.analogVal());
   }

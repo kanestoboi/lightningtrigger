@@ -1,16 +1,18 @@
 //
-//  timeLapse.hpp
-//  CameraSlider
+//  ThresholdTrigger.hpp
 //
-//  Created by Kane Stoboi on 23/06/2016.
+//  Created by Kane Stoboi on 19/04/2019.
 //  Copyright © 2016 Kane Stoboi. All rights reserved.
 //
 
 #ifndef ThresholdTrigger_h
 #define ThresholdTrigger_h
 
-
-
+extern volatile int ANALOGUE_VAL;
+extern volatile int THRESHOLD_TRIGGER_FLAG;
+extern volatile int THRESHOLD_TRIGGER_ADC_FLAG;
+extern volatile int THRESHOLD_TRIGGER_THRESHOLD;
+extern volatile int THRESHOLD_TRIGGER_OUTPUT;
 
 
 class ThresholdTrigger
