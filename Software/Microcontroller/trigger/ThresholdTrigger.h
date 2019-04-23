@@ -26,6 +26,7 @@ class ThresholdTrigger
     int analogVal();
     int getNumberOfTriggers();
     int getThreshold();
+    void reset();
     void resetCalibration();
     bool isCalibrated();
 

@@ -107,8 +107,8 @@ void setup() {
 
 
 void loop() {
-  display.clearDisplay();
-  display.display();
+  //display.clearDisplay();
+  //display.display();
 
   if (BLUETOOTH_INTERRUPT_FLAG) {
     if (bluetoothRxMessage == 't') {  // if the run time-lapse command was received from phone
@@ -162,12 +162,15 @@ void setupSoundMode() {
   thresholdTrigger.setADCInput(1);
   thresholdTrigger.setTriggerThreshold(soundThreshold);
   thresholdTrigger.setup();
+  thresholdTrigger.reset();
+  
 }
 
 void setupLightningMode() {
   thresholdTrigger.setADCInput(0); // Set multiplexer to 0
   thresholdTrigger.setTriggerThreshold(lightningThreshold);
   thresholdTrigger.setup();
+  thresholdTrigger.reset();
 }
 
 static void triggerCamera() {
@@ -180,7 +183,7 @@ static void releaseCamera() {
 
 void triggerFlash() {
   PORTB |= flashTriggerMask;  // trigger the outputs
-  _delay_ms(100);
+  _delay_ms(200);
   PORTB = 0b00000000;   // reset trigger outputs to off
 }
 
@@ -249,6 +252,8 @@ void lightningMode() {
 void soundMode() {
   setupSoundMode();
   Serial.println("Sound Mode");
+
+  
   
   display.clearDisplay();
   display.display();
@@ -256,29 +261,47 @@ void soundMode() {
   display.println("Sound Trigger Running");
   display.display();
 
+  while(1) {
+
   while (1) {
     if (BLUETOOTH_INTERRUPT_FLAG) {
       if (bluetoothRxMessage == 'r') {  // if the run time-lapse command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
         break;
       }
-      else {
+      else if (bluetoothRxMessage == 'e'){
         BLUETOOTH_INTERRUPT_FLAG = false;
         return;
       }   
     }
   }
 
+  thresholdTrigger.resetCalibration();
+  ADCSRA |= B01000000;
+  while(!thresholdTrigger.isCalibrated())
+    thresholdTrigger.calibrateThreshold();
+
   Bluetooth.println("Waiting for Sound");
   
   thresholdTrigger.triggerCamera();
-  while(thresholdTrigger.run()) {
-    ;
-    //Serial.println(ANALOGUE_VAL);
+  while(!thresholdTrigger.run()) {
+    if (BLUETOOTH_INTERRUPT_FLAG) {
+      if (bluetoothRxMessage == 'e') {  // if the run time-lapse command was received from phone
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        break;
+      }
+      
+      BLUETOOTH_INTERRUPT_FLAG = false;
+      
+    }
+//    Bluetooth.print(thresholdTrigger.getThreshold());
+//    Bluetooth.print(" | ");
+//    Bluetooth.println(thresholdTrigger.analogVal());
   }
   thresholdTrigger.releaseCamera();
 
   Bluetooth.println("Sound Triggered");
+  }
   
 }
 

@@ -35,9 +35,8 @@ void ThresholdTrigger::setup() {
   // AVCC with external capacitor at the AREF pin is used as VRef
   ADMUX |= B01000000;
   
-  // Clear MUX3..0 in ADMUX (0x7C) in preparation for setting the analog
-  // input
-  ADMUX &= B11110000;
+  
+  
 
   // Set the Prescaler to 128 (16000KHz/128 = 125KHz)
   // Above 200KHz 10-bit results are not reliable.
@@ -53,6 +52,10 @@ void ThresholdTrigger::setup() {
   
   // Set ACME high for multiplexer to select negative input of analogue comparator
   ADCSRB &= B01000000;
+}
+
+void ThresholdTrigger::reset() {
+  this->numberOfTriggers = 0;
 }
 
 void ThresholdTrigger::resetCalibration() {
@@ -101,6 +104,9 @@ int ThresholdTrigger::getThreshold() {
 }
 
 void ThresholdTrigger::setADCInput(int input) {
+  // Clear MUX3..0 in ADMUX (0x7C) in preparation for setting the analog
+  // input
+  ADMUX &= B11110000;
   if (input >= 0 && input <= 7)
     ADMUX |= input; // Set ADC multiplexer 
 }
