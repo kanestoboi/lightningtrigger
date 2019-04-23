@@ -18,11 +18,12 @@ volatile int THRESHOLD_TRIGGER_OUTPUT = 0;
 
  
 
-ThresholdTrigger::ThresholdTrigger(void (*triggerFunction)(), void (*releaseFunction)()) {
+ThresholdTrigger::ThresholdTrigger(void (*cameraTriggerFunction)(), void (*cameraReleaseFunction)(), void (*flashTriggerFunction)()) {
 
     
-    this->triggerCamera = triggerFunction;  
-    this->releaseCamera = releaseFunction;
+    this->triggerCamera = cameraTriggerFunction;  
+    this->releaseCamera = cameraReleaseFunction;
+    this->triggerFlash = flashTriggerFunction;
 }
 
 void ThresholdTrigger::setup() {
@@ -106,8 +107,7 @@ void ThresholdTrigger::setADCInput(int input) {
 
 void ThresholdTrigger::setTriggerThreshold(int threshold) {
   if (threshold >= 0 && threshold <= 1023)
-    triggerThreshold = threshold; // Set triggering threshold 
-    
+    triggerThreshold = threshold; // Set triggering threshold  
 }
 
 
@@ -115,9 +115,12 @@ void ThresholdTrigger::end() {
   this->releaseCamera();
 }
 
-void ThresholdTrigger::run() {
+bool ThresholdTrigger::run() {
+  bool cameraWasTriggered = false;
 
   if (THRESHOLD_TRIGGER_FLAG == true) {
+
+    cameraWasTriggered = true;
     
       if ((ADMUX & 0b00000001) == 0) {  // if lightning trigger mode trigger camera
         Serial.println("Triggered");
@@ -126,7 +129,7 @@ void ThresholdTrigger::run() {
         this->releaseCamera();
       }
       else if ((ADMUX & 0b00000001) == 1) {  // if sound mode trigger flash
-        //triggerFlash();
+        this->triggerFlash();
       }
       
       _delay_ms(500); // TODO: remove this delay 
@@ -142,6 +145,7 @@ void ThresholdTrigger::run() {
       */
         
       ADCSRA |= B01000000;  // kick off next ADC conversion
+
     }
 
     // If the ADC is complete update the threshold
@@ -152,6 +156,8 @@ void ThresholdTrigger::run() {
 
       ADCSRA |= B01000000;  // kick off next ADC conversion
     }
+
+    return cameraWasTriggered;
 }
 
 // Interrupt service routine for the ADC completion

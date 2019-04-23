@@ -11,6 +11,7 @@
 
 void triggerCamera();
 void releaseCamera();
+void triggerFlash();
 
 volatile bool BLUETOOTH_INTERRUPT_FLAG;
 
@@ -40,7 +41,7 @@ int tx = 11;  // software serial TX pin
 Adafruit_SSD1306 display(OLED_RESET);   // create LCD object
 SoftwareSerial Bluetooth(rx, tx);       // create bluetooth object
 Timelapse timelapse = Timelapse(&triggerCamera, &releaseCamera);
-ThresholdTrigger thresholdTrigger = ThresholdTrigger(&triggerCamera, &releaseCamera);
+ThresholdTrigger thresholdTrigger = ThresholdTrigger(&triggerCamera, &releaseCamera, &triggerFlash);
 BatteryIndicator batteryIndicator = BatteryIndicator(7);
 
 // Variables
@@ -267,11 +268,18 @@ void soundMode() {
       }   
     }
   }
- 
-  while(1) {
-    thresholdTrigger.run();
+
+  Bluetooth.println("Waiting for Sound");
+  
+  thresholdTrigger.triggerCamera();
+  while(thresholdTrigger.run()) {
+    ;
     //Serial.println(ANALOGUE_VAL);
   }
+  thresholdTrigger.releaseCamera();
+
+  Bluetooth.println("Sound Triggered");
+  
 }
 
 void timelapseMode() {

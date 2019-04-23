@@ -17,7 +17,7 @@ class ThresholdTrigger
 {
   public:
     // constructor, requires two pointers to the shutter and release functions
-    ThresholdTrigger(void (*triggerFunction)(), void (*releaseFunction)());
+    ThresholdTrigger(void (*cameraTriggerFunction)(), void (*cameraReleaseFunction)(), void (*flashTriggerFunction)());
 
     void setup();
     void setADCInput(int input);
@@ -36,10 +36,11 @@ class ThresholdTrigger
     // Function pointers
     void (*triggerCamera)();  // pointer to function that will trigger the camera to open the shutter
     void (*releaseCamera)();  // pointer to function that will release the camera shutter
+    void (*triggerFlash)();
     
     
     // functions to for time-lapse operation
-    void run();      
+    bool run();      
     void end();
 
     
