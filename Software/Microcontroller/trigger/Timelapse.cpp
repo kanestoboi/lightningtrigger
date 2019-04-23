@@ -1,5 +1,5 @@
 //
-//  timeLapse.cpp
+//  Timelapse.cpp
 //
 //  Created by Kane Stoboi on 16/04/2019.
 //  Copyright © 2016 Kane Stoboi. All rights reserved.

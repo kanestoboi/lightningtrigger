@@ -1,5 +1,5 @@
 //
-//  timeLapse.hpp
+//  Timelapse.hpp
 //  CameraSlider
 //
 //  Created by Kane Stoboi on 23/06/2016.
