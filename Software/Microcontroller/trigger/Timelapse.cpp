@@ -50,33 +50,33 @@ float Timelapse::getExposure() {
  @return void
  */
 void Timelapse::setExposure(float exposure) {
-    exposureTime = exposure;
+    this->exposureTime = exposure;
     
 }
 
 void Timelapse::calculateTotalPhotos() {
-    totalPhotos = (long)((((float)(timelapseTime))/(exposureTime+((float)(delayBetweenShots)))));
+    this->totalPhotos = (long)((((float)(this->timelapseTime))/(this->exposureTime + ((float)(this->delayBetweenShots)))));
 }
 
 long Timelapse::getTotalPhotos() {
-    totalPhotos = (long)((((float)(timelapseTime))*60.0/(exposureTime+((float)(delayBetweenShots)))));
-    return totalPhotos;
+    this->totalPhotos = (long)((((float)(timelapseTime))*60.0/(exposureTime+((float)(delayBetweenShots)))));
+    return this->totalPhotos;
 }
 
 long Timelapse::getPhotosTaken() {
-    return photosTaken;
+    return this->photosTaken;
 }
 
 int Timelapse::getDelayBetweenShots() {
-    return delayBetweenShots;
+    return this->delayBetweenShots;
 }
 
 void Timelapse::setDelayBetweenShots(int time) {
-    delayBetweenShots = time;
+    this->delayBetweenShots = time;
 }
 
 bool Timelapse::isDone() {
-    return (totalPhotos == photosTaken);
+    return (this->totalPhotos == this->photosTaken);
 }
 
 void Timelapse::end() {
@@ -84,23 +84,23 @@ void Timelapse::end() {
 }
 
 void Timelapse::reset() {
-  photosTaken = 0;
+  this->photosTaken = 0;
 }
 
 void Timelapse::run() {
   static bool initialRun = true;
-    if (((millis() - lastPhotoMillis) > (delayBetweenShots * 1000)) && cameraTriggered == false || initialRun) {
+  if (((millis() - this->lastPhotoMillis) > (this->delayBetweenShots * 1000)) && this->cameraTriggered == false || initialRun) {
       this->triggerCamera();
-      cameraTriggered = true;
-      triggeredMillis = millis();
+      this->cameraTriggered = true;
+      this->triggeredMillis = millis();
       initialRun = false;
     }
     else if (cameraTriggered == true) {
       if (millis() - triggeredMillis > long(exposureTime * 1000.0)) {
         this->releaseCamera();
-        photosTaken++;
-        cameraTriggered = false;
-        lastPhotoMillis = millis();        
+        this->photosTaken++;
+        this->cameraTriggered = false;
+        this->lastPhotoMillis = millis();        
       }
     }
 
