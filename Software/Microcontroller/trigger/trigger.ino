@@ -8,8 +8,10 @@
 #include "Timelapse.h"
 #include "ThresholdTrigger.h"
 #include "BatteryIndicator.h"
+#include "HDR.h"
 
 void triggerCamera();
+void focusCamera();
 void releaseCamera();
 void triggerFlash();
 
@@ -43,6 +45,7 @@ SoftwareSerial Bluetooth(rx, tx);       // create bluetooth object
 Timelapse timelapse = Timelapse(&triggerCamera, &releaseCamera);
 ThresholdTrigger thresholdTrigger = ThresholdTrigger(&triggerCamera, &releaseCamera, &triggerFlash);
 BatteryIndicator batteryIndicator = BatteryIndicator(7);
+HDR hdr = HDR(&triggerCamera, &releaseCamera, &focusCamera);
 
 // Variables
 int lightningThreshold = 1000;  // Threshold for light to trigger camera
@@ -53,6 +56,7 @@ uint8_t batteryLevel = 0;
 
 
 // masks used
+int cameraFocusMask = 0b00000001;
 int cameraTriggerMask = 0b00000010; // PORT B Mask
 int flashTriggerMask = 0b00001100;  // PORT B Mask
 int switchesMask = 0b01111100;
@@ -100,7 +104,7 @@ void setup() {
 
   //delay(4000);
 
-  timer2InterruptSetup();  
+  timer2InterruptSetup();
 
 }
 
@@ -109,6 +113,10 @@ void setup() {
 void loop() {
   //display.clearDisplay();
   //display.display();
+
+  hdrMode();
+
+  while(1);
 
   if (BLUETOOTH_INTERRUPT_FLAG) {
     if (bluetoothRxMessage == 't') {  // if the run time-lapse command was received from phone
@@ -125,6 +133,11 @@ void loop() {
       BLUETOOTH_INTERRUPT_FLAG = false;
       Bluetooth.println("lm");
       lightningMode();
+    }
+    else if (bluetoothRxMessage == 'h') {  // if the run HDR mode command was received from phone
+      BLUETOOTH_INTERRUPT_FLAG = false;
+      Bluetooth.println("hdr");
+      hdrMode();
     }
     else {
       BLUETOOTH_INTERRUPT_FLAG = false;
@@ -171,6 +184,10 @@ void setupLightningMode() {
   thresholdTrigger.setTriggerThreshold(lightningThreshold);
   thresholdTrigger.setup();
   thresholdTrigger.reset();
+}
+
+static void focusCamera() {
+  PORTB |= cameraFocusMask;  // focus the camera  
 }
 
 static void triggerCamera() {
@@ -345,6 +362,16 @@ void timelapseMode() {
   else 
     Bluetooth.println("Exited");
   
+}
+
+void hdrMode() {
+  Serial.println("HDR Mode");
+
+  delay(2000);
+  while (!hdr.isDone()) {
+    hdr.run();
+  }
+  Serial.println("HDR Done");
 }
 
 void timer2InterruptSetup() {
