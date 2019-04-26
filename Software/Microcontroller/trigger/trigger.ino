@@ -43,7 +43,7 @@ int tx = 11;  // software serial TX pin
 Adafruit_SSD1306 display(OLED_RESET);   // create LCD object
 SoftwareSerial Bluetooth(rx, tx);       // create bluetooth object
 Timelapse timelapse = Timelapse(&triggerCamera, &releaseCamera);
-ThresholdTrigger thresholdTrigger = ThresholdTrigger(&triggerCamera, &releaseCamera, &triggerFlash);
+ThresholdTrigger thresholdTrigger = ThresholdTrigger(&focusCamera, &triggerCamera, &releaseCamera, &triggerFlash);
 BatteryIndicator batteryIndicator = BatteryIndicator(7);
 HDR hdr = HDR(&triggerCamera, &releaseCamera, &focusCamera);
 
@@ -250,6 +250,7 @@ void lightningMode() {
   display.display();
   Serial.println("calibration done");
   ADCSRA |= B01000000;
+  thresholdTrigger.focusCamera();
   while(1) {
     thresholdTrigger.run();
     updateDisplay();

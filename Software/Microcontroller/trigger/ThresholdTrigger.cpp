@@ -18,9 +18,9 @@ volatile int THRESHOLD_TRIGGER_OUTPUT = 0;
 
  
 
-ThresholdTrigger::ThresholdTrigger(void (*cameraTriggerFunction)(), void (*cameraReleaseFunction)(), void (*flashTriggerFunction)()) {
+ThresholdTrigger::ThresholdTrigger(void (*cameraFocusFunction)(), void (*cameraTriggerFunction)(), void (*cameraReleaseFunction)(), void (*flashTriggerFunction)()) {
 
-    
+    this->focusCamera = cameraFocusFunction;
     this->triggerCamera = cameraTriggerFunction;  
     this->releaseCamera = cameraReleaseFunction;
     this->triggerFlash = flashTriggerFunction;
@@ -123,6 +123,7 @@ void ThresholdTrigger::end() {
 
 bool ThresholdTrigger::run() {
   bool cameraWasTriggered = false;
+  this->focusCamera();
 
   if (THRESHOLD_TRIGGER_FLAG == true) {
 
