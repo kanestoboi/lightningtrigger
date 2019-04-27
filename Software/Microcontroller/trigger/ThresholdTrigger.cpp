@@ -123,7 +123,6 @@ void ThresholdTrigger::end() {
 
 bool ThresholdTrigger::run() {
   bool cameraWasTriggered = false;
-  this->focusCamera();
 
   if (THRESHOLD_TRIGGER_FLAG == true) {
 
