@@ -17,7 +17,7 @@ void triggerFlash();
 
 volatile bool BLUETOOTH_INTERRUPT_FLAG;
 
-volatile char bluetoothRxMessage;
+String bluetoothRxMessage;
 
 /*********************************
  * DEVELOPMENT SETUP
@@ -113,28 +113,35 @@ void setup() {
 void loop() {
   //display.clearDisplay();
   //display.display();
-
-  hdrMode();
-
-  while(1);
+//  while (1) {
+//    if (BLUETOOTH_INTERRUPT_FLAG) {
+//      readBluetoothString();
+//
+//      Serial.println((bluetoothRxMessage.toInt()));
+//
+//      
+//      BLUETOOTH_INTERRUPT_FLAG = false;
+//    }
+//  }
 
   if (BLUETOOTH_INTERRUPT_FLAG) {
-    if (bluetoothRxMessage == 't') {  // if the run time-lapse command was received from phone
+    readBluetoothString();
+    if (bluetoothRxMessage == "t") {  // if the run time-lapse command was received from phone
       BLUETOOTH_INTERRUPT_FLAG = false;
       Bluetooth.println("tm");
       timelapseMode();
     }
-    else if (bluetoothRxMessage == 's') {  // if the run sound mode command was received from phone
+    else if (bluetoothRxMessage == "s") {  // if the run sound mode command was received from phone
       BLUETOOTH_INTERRUPT_FLAG = false;
       Bluetooth.println("sm");
       soundMode();
     }
-    else if (bluetoothRxMessage == 'l') {  // if the run lightning mode command was received from phone
+    else if (bluetoothRxMessage == "l") {  // if the run lightning mode command was received from phone
       BLUETOOTH_INTERRUPT_FLAG = false;
       Bluetooth.println("lm");
       lightningMode();
     }
-    else if (bluetoothRxMessage == 'h') {  // if the run HDR mode command was received from phone
+    else if (bluetoothRxMessage == "h") {  // if the run HDR mode command was received from phone
       BLUETOOTH_INTERRUPT_FLAG = false;
       Bluetooth.println("hdr");
       hdrMode();
@@ -152,7 +159,7 @@ void loop() {
 
 void bluetoothISR(){
   BLUETOOTH_INTERRUPT_FLAG = true; // trigger flag indicating a bluetoothRxMessage was received 
-  bluetoothRxMessage = Bluetooth.read();  // read the messgage
+  //bluetoothRxMessage = Bluetooth.read();  // read the messgage
 }
 
 void setSoundSensitivity(int val) {
@@ -224,7 +231,8 @@ void lightningMode() {
   BLUETOOTH_INTERRUPT_FLAG = false; //TODO: need to find out why bluetooth flag is being triggered from above line
   while (1) {
     if (BLUETOOTH_INTERRUPT_FLAG) {
-      if (bluetoothRxMessage == 'r') {  // if the run time-lapse command was received from phone
+      readBluetoothString();
+      if (bluetoothRxMessage == "r") {  // if the run time-lapse command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
         Bluetooth.println("Run Lightning Mode");
         break;
@@ -258,7 +266,8 @@ void lightningMode() {
     //Bluetooth.print(" | ");
     //Bluetooth.println(thresholdTrigger.analogVal());
     if (BLUETOOTH_INTERRUPT_FLAG) {
-      if (bluetoothRxMessage == 'e') {  // if the eit time-lapse command was received from phone
+      readBluetoothString();
+      if (bluetoothRxMessage == "e") {  // if the eit time-lapse command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
         break;
       }
@@ -283,11 +292,12 @@ void soundMode() {
 
   while (1) {
     if (BLUETOOTH_INTERRUPT_FLAG) {
-      if (bluetoothRxMessage == 'r') {  // if the run time-lapse command was received from phone
+      readBluetoothString();
+      if (bluetoothRxMessage == "r") {  // if the run time-lapse command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
         break;
       }
-      else if (bluetoothRxMessage == 'e'){
+      else if (bluetoothRxMessage == "e"){
         BLUETOOTH_INTERRUPT_FLAG = false;
         return;
       }   
@@ -304,7 +314,8 @@ void soundMode() {
   thresholdTrigger.triggerCamera();
   while(!thresholdTrigger.run()) {
     if (BLUETOOTH_INTERRUPT_FLAG) {
-      if (bluetoothRxMessage == 'e') {  // if the run time-lapse command was received from phone
+      readBluetoothString();
+      if (bluetoothRxMessage == "e") {  // if the run time-lapse command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
         break;
       }
@@ -330,11 +341,12 @@ void timelapseMode() {
   timelapse.reset();
   while (1) {
     if (BLUETOOTH_INTERRUPT_FLAG) {
-      if (bluetoothRxMessage == 'r') {  // if the run time-lapse command was received from phone
+      readBluetoothString();
+      if (bluetoothRxMessage == "r") {  // if the run time-lapse command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
         break;
       }
-      else if (bluetoothRxMessage == '1') {
+      else if (bluetoothRxMessage == "1") {
         timelapse.setTimelapseTime(timelapse.getTimelapseTime() + 1);
         Bluetooth.println(timelapse.getTimelapseTime());
         BLUETOOTH_INTERRUPT_FLAG = false;
@@ -349,7 +361,8 @@ void timelapseMode() {
   while (!timelapse.isDone()) {
     timelapse.run();
     if (BLUETOOTH_INTERRUPT_FLAG) {
-      if (bluetoothRxMessage == 'e') {  // if the eit time-lapse command was received from phone
+      readBluetoothString();
+      if (bluetoothRxMessage == "e") {  // if the eit time-lapse command was received from phone
         timelapse.end();
         BLUETOOTH_INTERRUPT_FLAG = false;
         break;
@@ -366,7 +379,29 @@ void timelapseMode() {
 }
 
 void hdrMode() {
-  Serial.println("HDR Mode");
+  Bluetooth.println("HDR Mode");
+  BLUETOOTH_INTERRUPT_FLAG = false;
+
+  while (1) {
+    if (BLUETOOTH_INTERRUPT_FLAG) {
+      readBluetoothString();
+      Serial.println(isValidNumber(bluetoothRxMessage));
+      if (bluetoothRxMessage == "r") {  // if the run time-lapse command was received from phone
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        break;
+      }
+      else if (isValidNumber(bluetoothRxMessage)) {
+        hdr.setCenterSpeed(bluetoothRxMessage.toInt());
+        BLUETOOTH_INTERRUPT_FLAG = false;
+      }
+      else {
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        return;
+      }     
+    }  
+  }
+
+  Bluetooth.println("Running HDR");
 
   delay(2000);
   while (!hdr.isDone()) {
@@ -374,6 +409,36 @@ void hdrMode() {
   }
   Serial.println("HDR Done");
 }
+
+void readBluetoothString() {
+
+  bluetoothRxMessage = ""; //clears variable for new input
+  
+  while (Bluetooth.available()) {
+    delay(1);  //small delay to allow input buffer to fill
+
+    char c = Bluetooth.read();  //gets one byte from serial buffer
+    if (c == ',') {
+      break;
+    }  //breaks out of capture loop to print readstring
+    bluetoothRxMessage += c; 
+  } //makes the string readString  
+
+  if (bluetoothRxMessage.length() >0) {
+    //Serial.println(bluetoothRxMessage); //prints string to serial port out
+
+    
+  }
+}
+
+boolean isValidNumber(String str){
+  for(byte i=0;i<str.length();i++)
+  {
+    if(isDigit(str.charAt(i))) 
+      return true;
+  }
+   return false;
+} 
 
 void timer2InterruptSetup() {
   TCCR1A = 0;// set entire TCCR1A register to 0
