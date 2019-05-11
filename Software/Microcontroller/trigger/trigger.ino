@@ -114,16 +114,6 @@ void setup() {
 void loop() {
   //display.clearDisplay();
   //display.display();
-//  while (1) {
-//    if (BLUETOOTH_INTERRUPT_FLAG) {
-//      readBluetoothString();
-//
-//      Serial.println((bluetoothRxMessage.toInt()));
-//
-//      
-//      BLUETOOTH_INTERRUPT_FLAG = false;
-//    }
-//  }
 
   if (BLUETOOTH_INTERRUPT_FLAG) {
     readBluetoothString();

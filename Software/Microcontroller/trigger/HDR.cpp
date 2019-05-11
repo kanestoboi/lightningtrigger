@@ -40,6 +40,12 @@ bool HDR::isDone() {
     return (this->photosTaken == 3);
 }
 
+void HDR::setCenter(int milliseconds) {
+	this->photoTimeExposure[0] = milliseconds/2;
+	this->photoTimeExposure[1] = milliseconds;
+	this->photoTimeExposure[2] = milliseconds + milliseconds/2;
+}
+
 void HDR::reset() {
   this->photosTaken = 0;
 }
