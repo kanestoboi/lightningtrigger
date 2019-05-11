@@ -4,6 +4,7 @@ SoftwareSerial BTserial(2, 3); // RX, TX
 
 char c=' ';
 boolean NL = true;
+
  
 
 void setup() {
