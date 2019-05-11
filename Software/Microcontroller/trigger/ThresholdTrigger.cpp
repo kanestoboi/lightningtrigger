@@ -40,6 +40,7 @@ void ThresholdTrigger::setup() {
 
   // Set the Prescaler to 128 (16000KHz/128 = 125KHz)
   // Above 200KHz 10-bit results are not reliable.
+  // ADC will do a conversion in about 152us with a clock of 16MHz
   ADCSRA = B00000111;
 
   // Set ADIE in ADCSRA (0x7A) to enable the ADC interrupt.
@@ -138,7 +139,7 @@ bool ThresholdTrigger::run() {
         this->triggerFlash();
       }
       
-      _delay_ms(500); // TODO: remove this delay 
+      //_delay_ms(500); // TODO: remove this delay 
       this->numberOfTriggers++;
       Serial.println(this->getNumberOfTriggers());
       
@@ -168,7 +169,6 @@ bool ThresholdTrigger::run() {
 
 // Interrupt service routine for the ADC completion
 ISR(ADC_vect){
-  
   THRESHOLD_TRIGGER_ADC_FLAG = true;
   ANALOGUE_VAL = ADCL | (ADCH << 8); // Must read low byte first
   THRESHOLD_TRIGGER_OUTPUT = int(0.505*(float)THRESHOLD_TRIGGER_OUTPUT + 0.495*(float)ANALOGUE_VAL);
