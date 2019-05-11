@@ -24,6 +24,8 @@ class Timelapse
     void setDelayBetweenShots(int time);
     int getDelayBetweenShots();
     void calculateTotalPhotos();
+    void setTotalPhotos(int photos);
+
     long getTotalPhotos();
     long getPhotosTaken();
 

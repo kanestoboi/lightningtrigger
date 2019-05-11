@@ -58,6 +58,10 @@ void ThresholdTrigger::reset() {
   this->numberOfTriggers = 0;
 }
 
+void ThresholdTrigger::setSensitivity(int s) {
+  this->sensitivity = s;
+}
+
 void ThresholdTrigger::resetCalibration() {
   this->thresholdCalibrated = false;
 }

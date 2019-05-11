@@ -29,6 +29,8 @@ class ThresholdTrigger
     int getNumberOfTriggers();
     int getThreshold();
     void reset();
+    void setSensitivity(int s);
+
     void resetCalibration();
     bool isCalibrated();
 
