@@ -114,9 +114,6 @@ void loop() {
   //display.clearDisplay();
   //display.display();
 
-  hdrMode();
-
-  while(1);
 
   if (BLUETOOTH_INTERRUPT_FLAG) {
     if (bluetoothRxMessage == 't') {  // if the run time-lapse command was received from phone
