@@ -54,8 +54,13 @@ void Timelapse::setExposure(float exposure) {
     
 }
 
+
 void Timelapse::calculateTotalPhotos() {
     this->totalPhotos = (long)((((float)(this->timelapseTime))/(this->exposureTime + ((float)(this->delayBetweenShots)))));
+}
+
+void Timelapse::setTotalPhotos(int photos) {
+  this->totalPhotos = photos;
 }
 
 long Timelapse::getTotalPhotos() {

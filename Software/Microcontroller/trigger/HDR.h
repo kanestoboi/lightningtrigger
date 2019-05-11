@@ -14,7 +14,11 @@ class HDR
     // constructor, requires two pointers to the shutter and release functions
     HDR(void (*cameraTriggerFunction)(), void (*cameraReleaseFunction)(), void (*cameraFocusFunction)());
 
-    void setCenter(int milliseconds);
+
+    void setCenterSpeed(int speed);
+    void setExposureValue(int ev);
+    void setPhotoTimeExposures();
+
     bool isDone();
     void reset();
     void run();
@@ -26,7 +30,13 @@ class HDR
     void (*focusCamera)();
 
   private:
+<<<<<<< HEAD
     long photoTimeExposure[4] = { 50, 100, 150};      //  the time exposure for each HDR photo
+=======
+    double centerSpeed = 1/15;   // the center shutter speed
+    double exposureValue = 1;  // exposure value for HDR 
+    long photoTimeExposure[4] = { 500, 750, 1000};      //  the time exposure for each HDR photo
+>>>>>>> f287527e8f0abd55c530fd7a23cd836271d6c3a2
     long delayBetweenPhotos = 200;      // delay in milliseconds between each photo
     int focusDelay = 500;       // delay in milliseconds between focusing and triggering the camera shutter
 
