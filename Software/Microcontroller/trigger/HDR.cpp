@@ -20,10 +20,10 @@ HDR::HDR(void (*cameraTriggerFunction)(), void (*cameraReleaseFunction)(), void 
 
 void HDR::setCenterSpeed(int speed) {
   this->centerSpeed = speed;
-  this->setPhotoTimeExposures();
-  for (int i = 0; i < 3; i++) {
-    Serial.println(this->photoTimeExposure[i]);
-  }
+  //this->setPhotoTimeExposures();
+  // for (int i = 0; i < 3; i++) {
+  //   Serial.println(this->photoTimeExposure[i]);
+  // }
 }
 
 void HDR::setExposureValue(int ev) {
@@ -34,31 +34,28 @@ void HDR::setPhotoTimeExposures() {
   this->photoTimeExposure[0] = (long)(1000.0 * (centerSpeed - (exposureValue/2.0 * centerSpeed)));
   this->photoTimeExposure[1] = (long)(1000.0 * centerSpeed);
   this->photoTimeExposure[2] = (long)(1000.0 * (centerSpeed + (exposureValue*2.0 * centerSpeed)));
+  for (int i = 0; i < 3; i++) {
+    Serial.println(this->photoTimeExposure[i]);
+  }
 }
 
 bool HDR::isDone() {
     return (this->photosTaken == 3);
 }
 
-void HDR::setCenter(int milliseconds) {
-	this->photoTimeExposure[0] = milliseconds/2;
-	this->photoTimeExposure[1] = milliseconds;
-	this->photoTimeExposure[2] = milliseconds + milliseconds/2;
-}
-
 void HDR::reset() {
+  this->initialRun = true;
   this->photosTaken = 0;
 }
 
 void HDR::run() {
-	static bool initialRun = true;
 	if (initialRun == true) {
 		this->lastPhotoMillis = millis();
 		this->releaseCamera();
-		initialRun = false;
+		this->initialRun = false;
 	}
 
-	if (((millis() - this->lastPhotoMillis) > (this->delayBetweenPhotos + this->focusDelay)) && (this->cameraTriggered == false || initialRun)) {
+	if (((millis() - this->lastPhotoMillis) > (this->delayBetweenPhotos + this->focusDelay)) && (this->cameraTriggered == false || this->initialRun)) {
     this->triggerCamera();
     this->cameraTriggered = true;
     this->triggeredMillis = millis();
@@ -69,7 +66,9 @@ void HDR::run() {
       this->releaseCamera();
       this->photosTaken++;
       this->cameraTriggered = false;
-      this->lastPhotoMillis = millis();        
+      this->lastPhotoMillis = millis();
+      Serial.write("Photos Taken: ");
+      Serial.println(photosTaken);        
     }
   }
   else if ((millis() - this->lastPhotoMillis) > (this->delayBetweenPhotos)) {
