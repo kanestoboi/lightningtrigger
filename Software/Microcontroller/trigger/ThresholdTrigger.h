@@ -30,6 +30,7 @@ class ThresholdTrigger
     int getThreshold();
     void reset();
     void setSensitivity(int s);
+    void setTriggerDelay(int d);
 
     void resetCalibration();
     bool isCalibrated();
@@ -54,6 +55,7 @@ class ThresholdTrigger
     int numberOfTriggers = 0;
     int triggerThreshold;
     int sensitivity = 10;
+    int triggerDelay = 0;
     bool thresholdCalibrated = false;
 
 };

@@ -63,6 +63,10 @@ void ThresholdTrigger::setSensitivity(int s) {
   this->sensitivity = s;
 }
 
+void ThresholdTrigger::setTriggerDelay(int d) {
+  this->triggerDelay = d;
+}
+
 void ThresholdTrigger::resetCalibration() {
   this->thresholdCalibrated = false;
 }
@@ -123,14 +127,15 @@ void ThresholdTrigger::setTriggerThreshold(int threshold) {
 
 
 void ThresholdTrigger::end() {
+  ADCSRA &= B01111111;
   this->releaseCamera();
+  ADCSRA &= B11110111;
 }
 
 bool ThresholdTrigger::run() {
   bool cameraWasTriggered = false;
 
   if (THRESHOLD_TRIGGER_FLAG == true) {
-
     cameraWasTriggered = true;
     
       if ((ADMUX & 0b00000001) == 0) {  // if lightning trigger mode trigger camera
@@ -140,7 +145,9 @@ bool ThresholdTrigger::run() {
         this->releaseCamera();
       }
       else if ((ADMUX & 0b00000001) == 1) {  // if sound mode trigger flash
+        delay(this->triggerDelay);
         this->triggerFlash();
+        this->releaseCamera();
       }
       
       //_delay_ms(500); // TODO: remove this delay 
@@ -154,7 +161,6 @@ bool ThresholdTrigger::run() {
       while(!this->isCalibrated())
         this->calibrateThreshold();
       */
-        
       ADCSRA |= B01000000;  // kick off next ADC conversion
 
     }
