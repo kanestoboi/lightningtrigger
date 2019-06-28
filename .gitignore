@@ -11,3 +11,15 @@ Hardware/lightning trigger.bak
 Hardware/fp-lib-table
 Hardware/bom.ini
 Hardware/board outline libreCAD.dxf~
+Hardware/lightning trigger Rev 2/bom/ibom.html
+Software/Microcontroller/AT_commands_HM-11_Setup/AT_commands_HM-11_Setup.ino.with_bootloader.standard.hex
+Software/Microcontroller/AT_commands_HM-11_Setup/AT_commands_HM-11_Setup.ino.standard.hex
+Software/Microcontroller/trigger/trigger.ino.with_bootloader.standard.hex
+Software/Microcontroller/trigger/trigger.ino.standard.hex
+Software/Microcontroller/trigger_tests/trigger_tests.ino
+Software/Microcontroller/AT_commands_HM-11_Setup/AT_commands_HM-11_Setup.ino
+Software/bluetooth/bluetooth.ino
+Reference/enclosure outline LibreCAD.dxf~
+Reference/board edge cuts rev 2 R12.dxf~
+Software/Microcontroller/AT_commands/AT_commands.ino
+Reference/ATMEL-MEGA328P-AU-Pin-Out-Diagram.png
