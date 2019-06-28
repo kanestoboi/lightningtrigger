@@ -14,18 +14,23 @@ class BatteryIndicator
     // constructor, requires two pointers to the shutter and release functions
     BatteryIndicator(int pin);
 
-    void setup();
+    
     int getBatteryLevelRaw();
     int getBatteryLevelPercentage();
+    bool getBatteryStatus();
 
   private:
+
     uint8_t ADCPin;
     uint8_t admuxHolder;
     uint8_t adcsraHolder;
     uint8_t adcsrbHolder;
-    int adcBatteryLevelMax = 614;
-    int adcBatteryLevelMin = 1023;
+    int adcBatteryLevelMax = 910;
+    int adcBatteryLevelMin = 987;
     double percentageCalcConstant = 100.0 / double(adcBatteryLevelMax - adcBatteryLevelMin);
+
+    void batteryPercentageSetup();
+    void batteryStatusSetup();
 
 };
 #endif /* BatteryIndicator_h */
