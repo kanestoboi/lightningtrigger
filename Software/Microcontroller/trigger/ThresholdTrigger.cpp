@@ -139,10 +139,12 @@ bool ThresholdTrigger::run() {
     cameraWasTriggered = true;
     
       if ((ADMUX & 0b00000001) == 0) {  // if lightning trigger mode trigger camera
-        Serial.println("Triggered");
+        //Serial.println("Triggered");
         this->triggerCamera();
         _delay_ms(200);
         this->releaseCamera();
+        _delay_ms(200);
+        this->focusCamera();
       }
       else if ((ADMUX & 0b00000001) == 1) {  // if sound mode trigger flash
         delay(this->triggerDelay);
@@ -152,7 +154,7 @@ bool ThresholdTrigger::run() {
       
       //_delay_ms(500); // TODO: remove this delay 
       this->numberOfTriggers++;
-      Serial.println(this->getNumberOfTriggers());
+      //Serial.println(this->getNumberOfTriggers());
       
       THRESHOLD_TRIGGER_FLAG = false;
       /*
