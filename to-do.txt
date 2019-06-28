@@ -1,22 +1,19 @@
 - make footprint for microphone
-- edit footprint for 5-way switch to have outline of switch
 - move footprints to a global library
-- add bluetooth functionality
 
-
-REV 2 HARDWARE UPDATES
-- add bluetooth functionality
-- flip LCD header around
-- move LCD header down so that cover can close
-- get new optoisolator (4 channel)
-- get smaller crystal
-- change lipo charger to send status to uC (Still need to do uC code)
-- add automatic power switching between usb and battery to allow for uC to display battery level when charging 
-- add battery level circuitry. Will likely need a voltage reference and voltage divider.
-- charger is not working correctly when power switch is off
+--------------------------
+REV 3 HARDWARE UPDATES
+--------------------------
+- add ground connection in schematic for USB input ADC
+- add Real Time Clock
+- fix GNDA and GNDD connection so that they are connected at star ground
+- external interrupt (pin 30) needs to be connected to bluetooth TX (pin 32)
+- crystal footprint needs to be fixed
+- add programming breakout pins for HM-11 to program baud rate, name ect once made
+- need to change battery power connector
 - add PIR sensor
-- need to add logic conversion for HM-11
-- need to add voltage conversion for HM-11 input to 3.3V
+- workout way to update firmware
+
 
 
 --------------------------
@@ -26,6 +23,28 @@ DONE
 - remove 5 way switch
 - change resistors and capacitor footprints to be 0603
 - Find new parts for 0603 capacitors and resistors
+- get new optoisolator (4 channel)
+- add battery level circuitry. Will likely need a voltage reference and voltage divider.
+- need to add logic conversion for HM-11
+- need to add voltage conversion for HM-11 input to 3.3V
+- charger is not working correctly when power switch is off
+- add automatic power switching between usb and battery to allow for uC to display battery level when charging 
+- change lipo charger to send status to uC (Still need to do uC code)
+- flip LCD header around
+- move LCD header down so that cover can close
+- add bluetooth functionality
+- edit footprint for 5-way switch to have outline of switch
+- get smaller crystal
+- add bluetooth status LED
+- add status led
+- test if I actually need a variable resistor for sound and light
+- change schematic for 2.5mm jacks
+- confirm tx/rx lines can be used for software serial
+
+
+
+
+
 
 robot shop order number for HM-11
 100240701
