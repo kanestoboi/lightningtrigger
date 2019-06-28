@@ -22,9 +22,10 @@ volatile bool BLUETOOTH_INTERRUPT_FLAG = false;
  * DEVELOPMENT SETUP
  ********************************/
 
-int rx = 2;  // software serial RX pin
-int tx = 3;  // software serial TX pin 
+int rx = 0;  // software serial RX pin
+int tx = 1;  // software serial TX pin 
 long counter = 0; // debugging counter
+int statusLEDPin = 5;
 
 
 /*********************************
@@ -51,19 +52,18 @@ DeserializationError error;
 // Variables
 int lightningSensitivity = 10;  // Threshold for light to trigger camera
 int soundSensitivity = 10;
-uint8_t batteryLevel = 0;
 
 
 // Various Flags
 
 
 // masks used
-int focus1Mask = 0b00000001;        // PORT B Mask
-int shutter1Mask = 0b00000010;      // PORT B Mask
+int focus1Mask = 0b00000010;        // PORT B Mask
+int shutter1Mask = 0b00000001;      // PORT B Mask
 int focus2Mask = 0b00001000;        // PORT B Mask
 int shutter2Mask = 0b00000100;      // PORT B Mask
 int focus3Mask = 0b00010000;        // PORT B Mask
-int shutter3Mask = 0b00100000;      // PORT B Mask
+int shutter3Mask = 0b00010000;      // PORT B Mask
 int focus4Mask = 0b00001000;        // PORT C Mask
 int shutter4Mask = 0b00010000;      // PORT C Mask
 int cameraFocusMask = 0b00000001;   // PORT B Mask
@@ -77,7 +77,7 @@ int upMask = 0b00100000;
 int rightMask = 0b01000000;
 
 void setup() {
-  Serial.begin(38400);
+  //Serial.begin(38400);
   Bluetooth.begin(38400);  // Begin the bluetooth serial and set data rate
   Wire.begin();
   
@@ -117,6 +117,8 @@ void setup() {
 
   timer2InterruptSetup();
 
+  pinMode(statusLEDPin, OUTPUT);
+
 }
 
 
@@ -124,6 +126,7 @@ void setup() {
 void loop() {
   //display.clearDisplay();
   //display.display();
+
 
 
   if (BLUETOOTH_INTERRUPT_FLAG) {
@@ -297,7 +300,14 @@ void lightningMode() {
 //  Serial.println("calibration done");
   ADCSRA |= B01000000;
   thresholdTrigger.focusCamera();
+
+  int triggers = 0;
   while(1) {
+    if (triggers < thresholdTrigger.getNumberOfTriggers()){
+      Bluetooth.print("Number of Triggers: ");
+      Bluetooth.println(thresholdTrigger.getNumberOfTriggers());
+      triggers = thresholdTrigger.getNumberOfTriggers();
+    }
     thresholdTrigger.run();
     if (BLUETOOTH_INTERRUPT_FLAG) {
       thresholdTrigger.end();
@@ -336,7 +346,7 @@ void soundMode() {
   //    Bluetooth.print(" | ");
   //    Bluetooth.write(thresholdTrigger.analogVal());
     }
-    thresholdTrigger.releaseCamera();
+    thresholdTrigger.end();
     delay(1000);
     Bluetooth.println("Sound Triggered");
 
@@ -404,11 +414,12 @@ void readBluetoothString() {
       incommingMessage += c; 
 
       if (c == '}') {
-        Serial.println("Breaking");
+        //Serial.println("Breaking");
         break;
       }  //breaks out of capture loop to print readstring
     } //makes the string readString  
   }
+
 
   if (incommingMessage.length() >0) {
     //Serial.println(incommingMessage); 
@@ -452,12 +463,15 @@ void timer2InterruptSetup() {
  **********************************/
 ISR(TIMER1_COMPA_vect) { //timer1 interrupt 4Hz 
   
-  batteryLevel = batteryIndicator.getBatteryLevelPercentage();
 
-  /*
-  Bluetooth.print("Battery Level: ");
-  Bluetooth.print(batteryIndicator.getBatteryLevelPercentage());
-  Bluetooth.write("%");
+  int batteryLevel = batteryIndicator.getBatteryLevelPercentage();
+  Bluetooth.print("Battery Level %: ");
+  Bluetooth.print(batteryLevel);
+  Bluetooth.println("%");
+
+  Bluetooth.print("batteryStatus: ");
+  Bluetooth.print(batteryIndicator.getBatteryStatus());
+  Bluetooth.println("");
   //setupLightningMode();*/
   
 }
