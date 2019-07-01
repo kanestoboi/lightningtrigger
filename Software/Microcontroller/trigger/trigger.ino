@@ -1,6 +1,8 @@
 // Include libraries for LCD
 #include <util/delay.h>
 #include <Wire.h>
+#include <avr/wdt.h>
+
 //#include <Adafruit_GFX.h>
 //#include <Adafruit_SSD1306.h>
 #include <StateMachine.h>
@@ -47,6 +49,7 @@ ThresholdTrigger thresholdTrigger = ThresholdTrigger(&focusCamera, &triggerCamer
 BatteryIndicator batteryIndicator = BatteryIndicator(7);
 HDR hdr = HDR(&triggerCamera, &releaseCamera, &focusCamera);
 StaticJsonDocument<150> bluetoothRxMessage;
+StaticJsonDocument<150> bluetoothTxMessage;
 DeserializationError error;
 
 // Variables
@@ -62,26 +65,53 @@ int focus1Mask = 0b00000010;        // PORT B Mask
 int shutter1Mask = 0b00000001;      // PORT B Mask
 int focus2Mask = 0b00001000;        // PORT B Mask
 int shutter2Mask = 0b00000100;      // PORT B Mask
-int focus3Mask = 0b00010000;        // PORT B Mask
+int focus3Mask = 0b00100000;        // PORT B Mask
 int shutter3Mask = 0b00010000;      // PORT B Mask
-int focus4Mask = 0b00001000;        // PORT C Mask
-int shutter4Mask = 0b00010000;      // PORT C Mask
-int cameraFocusMask = 0b00000001;   // PORT B Mask
-int cameraTriggerMask = 0b00000010; // PORT B Mask
-int flashTriggerMask = 0b00001100;  // PORT B Mask
-int switchesMask = 0b01111100;
-int downMask = 0b00000100;
-int centerMask = 0b00001000;
-int leftMask = 0b00010000;
-int upMask = 0b00100000;
-int rightMask = 0b01000000;
+int focus4Mask = 0b00001000;        // PORT D Mask
+int shutter4Mask = 0b00010000;      // PORT D Mask
+int PORTBCameraFocusMask = 0b00000000;   // PORT B Mask
+int PORTBCameraTriggerMask = 0b00000000; // PORT B Mask
+int PORTBFlashTriggerMask = 0b00000000;  // PORT B Mask
+
+int PORTDCameraFocusMask = 0b00000000;   // PORT B Mask
+int PORTDCameraTriggerMask = 0b00000000; // PORT B Mask
+int PORTDFlashTriggerMask = 0b00000000;  // PORT B Mask
+
 
 void setup() {
-  //Serial.begin(38400);
-  Bluetooth.begin(38400);  // Begin the bluetooth serial and set data rate
-  Wire.begin();
-  
 
+  char c;
+  //Serial.begin(38400);
+  Wire.begin();
+  Bluetooth.begin(38400);  // Begin the bluetooth serial and set data rate
+
+  /*
+
+  Bluetooth.print("A");
+    delay(100);
+    while(Bluetooth.available())
+            c = Bluetooth.read();
+
+    Bluetooth.print("AT");
+            delay(100);
+
+    while(Bluetooth.available())
+            c = Bluetooth.read();
+
+
+    delay(100);
+
+    Bluetooth.print("AT+NAMEDSLR REMOTE");
+    delay(100);
+        while(Bluetooth.available())
+            c = Bluetooth.read();
+
+    delay(100);
+
+    Bluetooth.print("AT+RESET");
+    delay(100);
+        while(Bluetooth.available())
+            c = Bluetooth.read();*/
   Bluetooth.println("Bluetooth connected");
 
   setSoundSensitivity(0);       // sets default sensitivity 
@@ -94,7 +124,7 @@ void setup() {
    * THE WORK AROUND BELOW SETS ALL PINS LOW BEFORE SETTING THEM AS INPUTS
    **********************************/
   DDRB = DDRB | 0b00111111; // set focus and shutter pins to be outputs
-  //DDRD = 0b00000000;
+  DDRD = DDRD | 0b00110000;
   //PORTD = 0b00000000;
   //DDRD = DDRD | switchesMask; // set the 5-way switch pins to be inputs
   
@@ -111,6 +141,7 @@ void setup() {
 
   attachInterrupt(0,bluetoothISR,  RISING); // setup interrupt for INT0 (UNO pin 2) //TODO: Change this to real interrupt
  
+  
 
 
   //delay(4000);
@@ -144,42 +175,44 @@ void loop() {
       hdr.setCenterSpeed(bluetoothRxMessage["exposureCenter"]);
       hdr.setExposureValue(bluetoothRxMessage["exposureValue"]);
 
-      cameraFocusMask = 0b00000000;
-      cameraTriggerMask = 0b00000000;
+      PORTBCameraFocusMask = 0b00000000;
+      PORTBCameraTriggerMask = 0b00000000;
       for (int i = 0; i < bluetoothRxMessage["cameraPort"].size(); i++)
       {
         if (bluetoothRxMessage["cameraPort"][i] == 1)
         {
-          cameraFocusMask |= focus1Mask;
-          cameraTriggerMask |= shutter1Mask;
+          PORTBCameraFocusMask |= focus1Mask;
+          PORTBCameraTriggerMask |= shutter1Mask;
+          
         } else if (bluetoothRxMessage["cameraPort"][i] == 2) {
-          cameraFocusMask |= focus2Mask;
-          cameraTriggerMask |= shutter2Mask;
+          PORTBCameraFocusMask |= focus2Mask;
+          PORTBCameraTriggerMask |= shutter2Mask;
         } else if (bluetoothRxMessage["cameraPort"][i] == 3) {
-          cameraFocusMask |= focus3Mask;
-          cameraTriggerMask |= shutter3Mask;
+          PORTBCameraFocusMask |= focus3Mask;
+          PORTBCameraTriggerMask |= shutter3Mask;
         } else if (bluetoothRxMessage["cameraPort"][i] == 4) {
-          cameraFocusMask |= focus4Mask;
-          cameraTriggerMask |= shutter4Mask;
+          PORTDCameraFocusMask |= focus4Mask;
+          PORTDCameraTriggerMask |= shutter4Mask;
         }
       }
 
-      flashTriggerMask = 0b00000000;
+      PORTBFlashTriggerMask = 0b00000000;
+      PORTDFlashTriggerMask &= 0b11001111;
       for (int i = 0; i < bluetoothRxMessage["flashPort"].size(); i++)
       {
         if (bluetoothRxMessage["flashPort"][i] == 1)
         {
-          flashTriggerMask |= focus1Mask;
-          flashTriggerMask |= shutter1Mask;
+          PORTBFlashTriggerMask |= focus1Mask;
+          PORTBFlashTriggerMask |= shutter1Mask;
         } else if (bluetoothRxMessage["flashPort"][i] == 2) {
-          flashTriggerMask |= focus2Mask;
-          flashTriggerMask |= shutter2Mask;
+          PORTBFlashTriggerMask |= focus2Mask;
+          PORTBFlashTriggerMask |= shutter2Mask;
         } else if (bluetoothRxMessage["flashPort"][i] == 3) {
-          flashTriggerMask |= focus3Mask;
-          flashTriggerMask |= shutter3Mask;
+          PORTBFlashTriggerMask |= focus3Mask;
+          PORTBFlashTriggerMask |= shutter3Mask;
         } else if (bluetoothRxMessage["flashPort"][i] == 4) {
-          flashTriggerMask |= focus4Mask;
-          flashTriggerMask |= shutter4Mask;
+          PORTDFlashTriggerMask |= focus4Mask;
+          PORTDFlashTriggerMask |= shutter4Mask;
         }
       }
 
@@ -198,6 +231,10 @@ void loop() {
       else if (bluetoothRxMessage["mode"] == "hdr") {  // if the run HDR mode command was received from phone
         BLUETOOTH_INTERRUPT_FLAG = false;
         hdrMode();
+      }
+      else if (bluetoothRxMessage["mode"] == "update") {  // if the run HDR mode command was received from phone
+        BLUETOOTH_INTERRUPT_FLAG = false;
+        resetTimeout();
       }
       else {
         BLUETOOTH_INTERRUPT_FLAG = false;
@@ -246,22 +283,26 @@ void setupLightningMode() {
 }
 
 static void focusCamera() {
-  PORTB |= cameraFocusMask;  // focus the camera  
+  PORTB |= PORTBCameraFocusMask;  // focus the camera  
+  PORTD |= PORTDCameraFocusMask;  // focus the camera
 }
 
 static void triggerCamera() {
-  PORTB |= cameraTriggerMask;  // trigger the outputs  
+  PORTB |= PORTBCameraTriggerMask;  // trigger the outputs
+  PORTD |= PORTDCameraTriggerMask;  
 }
 
 static void releaseCamera() {
-  PORTB = 0b00000000;   // reset trigger outputs to off
-  PORTC &= 0b11100111;
+  PORTB &= ~(PORTBCameraFocusMask | PORTBCameraTriggerMask);   // reset camera outputs to off
+  PORTD &= ~(PORTDCameraFocusMask | PORTDCameraTriggerMask);
 }
 
 void triggerFlash() {
-  PORTB |= flashTriggerMask;  // trigger the outputs
+  PORTB |= PORTBFlashTriggerMask;  // trigger the outputs
+  PORTD |= PORTDFlashTriggerMask;  // trigger the outputs
   _delay_ms(200);
-  PORTB = 0b00000000;   // reset trigger outputs to off
+  PORTB &= ~PORTBFlashTriggerMask;   // reset trigger outputs to off
+  PORTD &= ~PORTDFlashTriggerMask;   // reset trigger outputs to off
 }
 
 
@@ -300,7 +341,7 @@ void lightningMode() {
 //  Serial.println("calibration done");
   ADCSRA |= B01000000;
   thresholdTrigger.focusCamera();
-
+  counter = 0;
   int triggers = 0;
   while(1) {
     if (triggers < thresholdTrigger.getNumberOfTriggers()){
@@ -309,6 +350,7 @@ void lightningMode() {
       triggers = thresholdTrigger.getNumberOfTriggers();
     }
     thresholdTrigger.run();
+    
     if (BLUETOOTH_INTERRUPT_FLAG) {
       thresholdTrigger.end();
       readBluetoothString();
@@ -342,9 +384,6 @@ void soundMode() {
         return;
                 
       }
-  //    Bluetooth.print(THRESHOLD_TRIGGER_THRESHOLD);
-  //    Bluetooth.print(" | ");
-  //    Bluetooth.write(thresholdTrigger.analogVal());
     }
     thresholdTrigger.end();
     delay(1000);
@@ -444,6 +483,16 @@ boolean isValidNumber(String str){
    return false;
 } 
 
+void resetTimeout() {
+  Bluetooth.println("Resetting");
+  //asm volatile ("jmp 0");
+  
+  wdt_disable();
+  wdt_enable(WDTO_30MS);
+
+  while(1){;}
+}
+
 void timer2InterruptSetup() {
   TCCR1A = 0;// set entire TCCR1A register to 0
   TCCR1B = 0;// same for TCCR1B
@@ -462,16 +511,22 @@ void timer2InterruptSetup() {
  * OVERFLOW TIMER RUNS "ASYNCHRONOUS" CODE EVERY 4 SECONDS
  **********************************/
 ISR(TIMER1_COMPA_vect) { //timer1 interrupt 4Hz 
-  
 
-  int batteryLevel = batteryIndicator.getBatteryLevelPercentage();
-  Bluetooth.print("Battery Level %: ");
-  Bluetooth.print(batteryLevel);
-  Bluetooth.println("%");
 
-  Bluetooth.print("batteryStatus: ");
-  Bluetooth.print(batteryIndicator.getBatteryStatus());
-  Bluetooth.println("");
-  //setupLightningMode();*/
+  int admuxHolder = ADMUX;
+  int adcsraHolder = ADCSRA;
+  int adcsrbHolder = ADCSRB;
+  String output;
+  bluetoothTxMessage["batteryLevel"] = batteryIndicator.getBatteryLevelPercentage();
+  bluetoothTxMessage["batteryStatus"] = batteryIndicator.getBatteryStatus();
+  //
+  serializeJson(bluetoothTxMessage, output);
+  Bluetooth.println(output);
+
+  ADMUX = admuxHolder;
+  ADCSRA = adcsraHolder;
+  ADCSRB = adcsrbHolder;
+  ADCSRA |= B01000000;  // kick off next ADC
+
   
 }

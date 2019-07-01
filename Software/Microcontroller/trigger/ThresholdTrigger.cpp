@@ -35,8 +35,6 @@ void ThresholdTrigger::setup() {
   // AVCC with external capacitor at the AREF pin is used as VRef
   ADMUX |= B01000000;
   
-  
-  
 
   // Set the Prescaler to 128 (16000KHz/128 = 125KHz)
   // Above 200KHz 10-bit results are not reliable.

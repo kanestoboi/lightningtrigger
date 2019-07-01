@@ -96,7 +96,7 @@ void BatteryIndicator::batteryStatusSetup() {
   // Above 200KHz 10-bit results are not reliable.
   ADCSRA = 0b00000111;
 
-  // Set ADIE in ADCSRA (0x7A) to enable the ADC interrupt.
+  // Set ADIE in ADCSRA (0x7A) to disable the ADC interrupt.
   // Without this, the internal interrupt will not trigger.
   ADCSRA &= 0b11110111;
   
@@ -123,6 +123,7 @@ bool BatteryIndicator::getBatteryStatus() {
   ADCSRB = this->adcsrbHolder;
 
   ADCSRA |= B01000000;  // kick off next ADC
+  ADCSRA |= 0b00001000;
 
   return ((ADCL | (ADCH << 8)) > 100); // return the complete ADC
 }
