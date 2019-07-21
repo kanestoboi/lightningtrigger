@@ -1,23 +1,46 @@
 - make footprint for microphone
 - move footprints to a global library
+- Create JSON format for information sending from trigger to phone
+
+--------------------------
+REV 3 SOFTWARE UPDATES
+--------------------------
+- change BT status and status LED pins
+- timelapse needs to show current progress (progress bar?)
+- lightning mode needs total photos that have been captured
+- lightning and sound mode need to have a suggested sensitivity
+- pause functionality for timelapse 
+- single shot mode needs press and hold
 
 --------------------------
 REV 3 HARDWARE UPDATES
 --------------------------
-- add ground connection in schematic for USB input ADC
+- remove 16MHz crystal (need to get 8MHz bootloader)
+- move output port 1 closer to edge of board
+- move SMD components around through hole components the minimum distance for selective solder	(seems to be 4 mm but need to confirm)
+- add circuitry to have an output port as an input
+- change battery percentage input to be directly from battery terminals
 - add Real Time Clock
-- fix GNDA and GNDD connection so that they are connected at star ground
-- external interrupt (pin 30) needs to be connected to bluetooth TX (pin 32)
-- crystal footprint needs to be fixed
-- add programming breakout pins for HM-11 to program baud rate, name ect once made
+- fix GNDA and GNDD connection so that they are connected at star ground (make star ground footprint?)
 - need to change battery power connector
-- add PIR sensor
+- add PIR sensor?
+
+--------------------------
+DONE FOR REV 3
+--------------------------
+- Change optocoupler resistors to use lower value
+- crystal footprint needs to be fixed
+- battery protection is not cutting power at 3V (-BATT and GND on AP211 pins were around the wrong way)
+- add npn transistor and resistor to reset pin
+- add programming breakout pins for HM-11 to program baud rate, name ect once made
+- add ground connection in schematic for USB input ADC
+- external interrupt (pin 30) needs to be connected to bluetooth TX (pin 32)
 - workout way to update firmware
 
 
 
 --------------------------
-DONE
+DONE FOR REV 2
 --------------------------
 - 5 way switch footprint and schematic are incorrect and needs to be re done - Removed 5 way switch as bluetooth will be used in rev 2- remove 5 way switch
 - remove 5 way switch
