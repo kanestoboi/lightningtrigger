@@ -1,24 +1,23 @@
 // Include libraries for LCD
 #include <util/delay.h>
 #include <Wire.h>
-#include <avr/wdt.h>
 
-//#include <Adafruit_GFX.h>
-//#include <Adafruit_SSD1306.h>
-#include <StateMachine.h>
+
 #include <SoftwareSerial.h>// import the serial library
 #include <ArduinoJson.h>
+
 #include "Timelapse.h"
 #include "ThresholdTrigger.h"
 #include "BatteryIndicator.h"
 #include "HDR.h"
+
 
 void triggerCamera();
 void focusCamera();
 void releaseCamera();
 void triggerFlash();
 
-volatile bool BLUETOOTH_INTERRUPT_FLAG = false;
+volatile bool Serial_INTERRUPT_FLAG = false;
 
 /*********************************
  * DEVELOPMENT SETUP
@@ -43,13 +42,13 @@ int tx = 11;  // software serial TX pin
 
 // Create various objects
 //Adafruit_SSD1306 display(OLED_RESET);   // create LCD object
-SoftwareSerial Bluetooth(rx, tx);       // create bluetooth object
+//SoftwareSerial Serial(rx, tx);       // create Serial object
 Timelapse timelapse = Timelapse(&triggerCamera, &releaseCamera);
 ThresholdTrigger thresholdTrigger = ThresholdTrigger(&focusCamera, &triggerCamera, &releaseCamera, &triggerFlash);
 BatteryIndicator batteryIndicator = BatteryIndicator(7);
 HDR hdr = HDR(&triggerCamera, &releaseCamera, &focusCamera);
-StaticJsonDocument<150> bluetoothRxMessage;
-StaticJsonDocument<150> bluetoothTxMessage;
+StaticJsonDocument<150> SerialRxMessage;
+StaticJsonDocument<150> SerialTxMessage;
 DeserializationError error;
 
 // Variables
@@ -83,41 +82,44 @@ void setup() {
   char c;
   //Serial.begin(38400);
   Wire.begin();
-  Bluetooth.begin(38400);  // Begin the bluetooth serial and set data rate
+  Serial.begin(115200);  // Begin the Serial serial and set data rate
 
-  /*
-
-  Bluetooth.print("A");
+  
+/*
+  Serial.print("A");
     delay(100);
-    while(Bluetooth.available())
-            c = Bluetooth.read();
+    while(Serial.available())
+            c = Serial.read();
 
-    Bluetooth.print("AT");
+    Serial.print("AT");
             delay(100);
 
-    while(Bluetooth.available())
-            c = Bluetooth.read();
+    while(Serial.available())
+            c = Serial.read();
 
 
     delay(100);
 
-    Bluetooth.print("AT+NAMEDSLR REMOTE");
+    Serial.print("AT+NAMEDSLR REMOTE");
     delay(100);
-        while(Bluetooth.available())
-            c = Bluetooth.read();
+        while(Serial.available())
+            c = Serial.read();
 
     delay(100);
 
-    Bluetooth.print("AT+RESET");
+    Serial.print("AT+MODE2");
     delay(100);
-        while(Bluetooth.available())
-            c = Bluetooth.read();*/
-  Bluetooth.println("Bluetooth connected");
+        while(Serial.available())
+            c = Serial.read();
+
+            */
+
+            
+  Serial.println("Serial connected");
+  sei();
 
   setSoundSensitivity(0);       // sets default sensitivity 
   setLightningSensitivity(127); // sets default sensitivity
-  //display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x32)
-  //display.clearDisplay();   // clear the adafruit splash screen
   
   /**********************************
    * THERE IS A BUG IN THE DISPLAY.BEGIN FUNCTION CAUSING PD4 TO BE SET HIGH
@@ -125,72 +127,50 @@ void setup() {
    **********************************/
   DDRB = DDRB | 0b00111111; // set focus and shutter pins to be outputs
   DDRD = DDRD | 0b00110000;
-  //PORTD = 0b00000000;
-  //DDRD = DDRD | switchesMask; // set the 5-way switch pins to be inputs
-  
 
-//  display.setTextSize(1);
-//  display.setTextColor(WHITE);
-//  display.setCursor(0,0);
-//  display.println("Lightning Trigger");
-//  display.setCursor(0,20);
-//  display.print("Threshold: ");
-//  display.println(lightningThreshold);
-//  display.display();
-
-
-  attachInterrupt(0,bluetoothISR,  RISING); // setup interrupt for INT0 (UNO pin 2) //TODO: Change this to real interrupt
- 
-  
-
-
-  //delay(4000);
+  attachInterrupt(0,SerialISR,  RISING); // setup interrupt for INT0 (UNO pin 2) //TODO: Change this to real interrupt
 
   timer2InterruptSetup();
 
   pinMode(statusLEDPin, OUTPUT);
 
+
 }
 
 
-
 void loop() {
-  //display.clearDisplay();
-  //display.display();
 
-
-
-  if (BLUETOOTH_INTERRUPT_FLAG) {
-    readBluetoothString();
-    Bluetooth.println("");
-    Bluetooth.println("Bluetooth Message");
+  if (Serial_INTERRUPT_FLAG) {
+    readSerialString();
+    Serial.println("");
+    Serial.println("Serial Message");
     //interrupts();
     if (error) {
-      BLUETOOTH_INTERRUPT_FLAG = false;
-      Bluetooth.println("DeserializationError");
+      Serial_INTERRUPT_FLAG = false;
+      Serial.println("DeserializationError");
     }
     else {
-      thresholdTrigger.setSensitivity(bluetoothRxMessage["sensitivity"]);
-      thresholdTrigger.setTriggerDelay(bluetoothRxMessage["delay"]);
-      hdr.setCenterSpeed(bluetoothRxMessage["exposureCenter"]);
-      hdr.setExposureValue(bluetoothRxMessage["exposureValue"]);
+      thresholdTrigger.setSensitivity(SerialRxMessage["sensitivity"]);
+      thresholdTrigger.setTriggerDelay(SerialRxMessage["delay"]);
+      hdr.setCenterSpeed(SerialRxMessage["exposureCenter"]);
+      hdr.setExposureValue(SerialRxMessage["exposureValue"]);
 
       PORTBCameraFocusMask = 0b00000000;
       PORTBCameraTriggerMask = 0b00000000;
-      for (int i = 0; i < bluetoothRxMessage["cameraPort"].size(); i++)
+      for (int i = 0; i < SerialRxMessage["cameraPort"].size(); i++)
       {
-        if (bluetoothRxMessage["cameraPort"][i] == 1)
+        if (SerialRxMessage["cameraPort"][i] == 1)
         {
           PORTBCameraFocusMask |= focus1Mask;
           PORTBCameraTriggerMask |= shutter1Mask;
           
-        } else if (bluetoothRxMessage["cameraPort"][i] == 2) {
+        } else if (SerialRxMessage["cameraPort"][i] == 2) {
           PORTBCameraFocusMask |= focus2Mask;
           PORTBCameraTriggerMask |= shutter2Mask;
-        } else if (bluetoothRxMessage["cameraPort"][i] == 3) {
+        } else if (SerialRxMessage["cameraPort"][i] == 3) {
           PORTBCameraFocusMask |= focus3Mask;
           PORTBCameraTriggerMask |= shutter3Mask;
-        } else if (bluetoothRxMessage["cameraPort"][i] == 4) {
+        } else if (SerialRxMessage["cameraPort"][i] == 4) {
           PORTDCameraFocusMask |= focus4Mask;
           PORTDCameraTriggerMask |= shutter4Mask;
         }
@@ -198,46 +178,42 @@ void loop() {
 
       PORTBFlashTriggerMask = 0b00000000;
       PORTDFlashTriggerMask &= 0b11001111;
-      for (int i = 0; i < bluetoothRxMessage["flashPort"].size(); i++)
+      for (int i = 0; i < SerialRxMessage["flashPort"].size(); i++)
       {
-        if (bluetoothRxMessage["flashPort"][i] == 1)
+        if (SerialRxMessage["flashPort"][i] == 1)
         {
           PORTBFlashTriggerMask |= focus1Mask;
           PORTBFlashTriggerMask |= shutter1Mask;
-        } else if (bluetoothRxMessage["flashPort"][i] == 2) {
+        } else if (SerialRxMessage["flashPort"][i] == 2) {
           PORTBFlashTriggerMask |= focus2Mask;
           PORTBFlashTriggerMask |= shutter2Mask;
-        } else if (bluetoothRxMessage["flashPort"][i] == 3) {
+        } else if (SerialRxMessage["flashPort"][i] == 3) {
           PORTBFlashTriggerMask |= focus3Mask;
           PORTBFlashTriggerMask |= shutter3Mask;
-        } else if (bluetoothRxMessage["flashPort"][i] == 4) {
+        } else if (SerialRxMessage["flashPort"][i] == 4) {
           PORTDFlashTriggerMask |= focus4Mask;
           PORTDFlashTriggerMask |= shutter4Mask;
         }
       }
 
-      if (bluetoothRxMessage["mode"] == "tm") {  // if the run time-lapse command was received from phone
-        BLUETOOTH_INTERRUPT_FLAG = false;
+      if (SerialRxMessage["mode"] == "tm") {  // if the run time-lapse command was received from phone
+        Serial_INTERRUPT_FLAG = false;
         timelapseMode();
       }
-      else if (bluetoothRxMessage["mode"] == "sm") {  // if the run sound mode command was received from phone
-        BLUETOOTH_INTERRUPT_FLAG = false;
+      else if (SerialRxMessage["mode"] == "sm") {  // if the run sound mode command was received from phone
+        Serial_INTERRUPT_FLAG = false;
         soundMode();  
       }
-      else if (bluetoothRxMessage["mode"] == "lm") {  // if the run lightning mode command was received from phone
-        BLUETOOTH_INTERRUPT_FLAG = false;
+      else if (SerialRxMessage["mode"] == "lm") {  // if the run lightning mode command was received from phone
+        Serial_INTERRUPT_FLAG = false;
         lightningMode();
       }
-      else if (bluetoothRxMessage["mode"] == "hdr") {  // if the run HDR mode command was received from phone
-        BLUETOOTH_INTERRUPT_FLAG = false;
+      else if (SerialRxMessage["mode"] == "hdr") {  // if the run HDR mode command was received from phone
+        Serial_INTERRUPT_FLAG = false;
         hdrMode();
       }
-      else if (bluetoothRxMessage["mode"] == "update") {  // if the run HDR mode command was received from phone
-        BLUETOOTH_INTERRUPT_FLAG = false;
-        resetTimeout();
-      }
       else {
-        BLUETOOTH_INTERRUPT_FLAG = false;
+        Serial_INTERRUPT_FLAG = false;
       }   
     }
   }
@@ -248,9 +224,9 @@ void loop() {
   
 }
 
-void bluetoothISR(){
-  BLUETOOTH_INTERRUPT_FLAG = true; // trigger flag indicating a bluetoothRxMessage was received 
-  //bluetoothRxMessage = Bluetooth.read();  // read the messgage
+void SerialISR(){
+  Serial_INTERRUPT_FLAG = true; // trigger flag indicating a SerialRxMessage was received 
+  //SerialRxMessage = Serial.read();  // read the messgage
 }
 
 void setSoundSensitivity(int val) {
@@ -321,17 +297,17 @@ void lightningMode() {
 //  display.display();
   
   setupLightningMode();
-  Bluetooth.println("Lightning Mode");
-  BLUETOOTH_INTERRUPT_FLAG = false; //TODO: need to find out why bluetooth flag is being triggered from above line
+  Serial.println("Lightning Mode");
+  Serial_INTERRUPT_FLAG = false; //TODO: need to find out why Serial flag is being triggered from above line
 
-  thresholdTrigger.setSensitivity(bluetoothRxMessage["sensitivity"]); 
+  thresholdTrigger.setSensitivity(SerialRxMessage["sensitivity"]); 
 
   thresholdTrigger.resetCalibration();
   ADCSRA |= B01000000;
   while(!thresholdTrigger.isCalibrated())
     thresholdTrigger.calibrateThreshold();
 
-  Bluetooth.println("Calibrated  Lightning Mode");
+  Serial.println("Calibrated  Lightning Mode");
 
 //  display.clearDisplay();
 //  display.display();
@@ -345,16 +321,16 @@ void lightningMode() {
   int triggers = 0;
   while(1) {
     if (triggers < thresholdTrigger.getNumberOfTriggers()){
-      Bluetooth.print("Number of Triggers: ");
-      Bluetooth.println(thresholdTrigger.getNumberOfTriggers());
+      Serial.print("Number of Triggers: ");
+      Serial.println(thresholdTrigger.getNumberOfTriggers());
       triggers = thresholdTrigger.getNumberOfTriggers();
     }
     thresholdTrigger.run();
     
-    if (BLUETOOTH_INTERRUPT_FLAG) {
+    if (Serial_INTERRUPT_FLAG) {
       thresholdTrigger.end();
-      readBluetoothString();
-      Bluetooth.println("Exiting Lightning Mode");
+      //readSerialString();
+      Serial.println("Exiting Lightning Mode");
       return;
     }
   }
@@ -362,7 +338,7 @@ void lightningMode() {
 
 void soundMode() {
   setupSoundMode();
-  Bluetooth.println("Sound Mode");
+  Serial.println("Sound Mode");
 
   //while(1) {
 
@@ -371,23 +347,22 @@ void soundMode() {
     while(!thresholdTrigger.isCalibrated())
       thresholdTrigger.calibrateThreshold();
   
-    Bluetooth.println("Waiting for Sound");
+    Serial.println("Waiting for Sound");
     thresholdTrigger.triggerCamera();
     delay(1000);
     
-    BLUETOOTH_INTERRUPT_FLAG = false;
+    Serial_INTERRUPT_FLAG = false;
     while(!thresholdTrigger.run()) {
-      if (BLUETOOTH_INTERRUPT_FLAG) {
+      if (Serial_INTERRUPT_FLAG) {
         thresholdTrigger.end();
-        readBluetoothString();
-        Bluetooth.println("Exiting Sound Mode");
+        Serial.println("Exiting Sound Mode");
         return;
                 
       }
     }
     thresholdTrigger.end();
     delay(1000);
-    Bluetooth.println("Sound Triggered");
+    Serial.println("Sound Triggered");
 
   //}
   
@@ -395,42 +370,42 @@ void soundMode() {
 
 void timelapseMode() {
   
-  Bluetooth.write("Timelapse Mode");
-  BLUETOOTH_INTERRUPT_FLAG = false;   //TODO: need to find out why bluetooth flag is being triggered from above line
+  Serial.write("Timelapse Mode");
+  Serial_INTERRUPT_FLAG = false;   //TODO: need to find out why Serial flag is being triggered from above line
   timelapse.reset();
 
-  timelapse.setExposure(bluetoothRxMessage["exposure"]);
-  timelapse.setTotalPhotos(bluetoothRxMessage["photos"]);
-  timelapse.setDelayBetweenShots(bluetoothRxMessage["delay"]);
+  timelapse.setExposure(SerialRxMessage["exposure"]);
+  timelapse.setTotalPhotos(SerialRxMessage["photos"]);
+  timelapse.setDelayBetweenShots(SerialRxMessage["delay"]);
   
   
   while (!timelapse.isDone()) {
     timelapse.run();
-    if (BLUETOOTH_INTERRUPT_FLAG) {
-      readBluetoothString();
-      if (bluetoothRxMessage["flag"] == "err") {  // if the eit time-lapse command was received from phone
+    if (Serial_INTERRUPT_FLAG) {
+      readSerialString();
+      if (SerialRxMessage["flag"] == "err") {  // if the eit time-lapse command was received from phone
         timelapse.end();
-        BLUETOOTH_INTERRUPT_FLAG = false;
+        Serial_INTERRUPT_FLAG = false;
         break;
       }
-      BLUETOOTH_INTERRUPT_FLAG = false; // reset interrupt flag
+      Serial_INTERRUPT_FLAG = false; // reset interrupt flag
     }
   }
   
   if (timelapse.isDone())
-    Bluetooth.write("Complete");
+    Serial.write("Complete");
   else 
-    Bluetooth.write("Exited");
+    Serial.write("Exited");
   
 }
 
 void hdrMode() {
-  Bluetooth.println("HDR Mode");
-  BLUETOOTH_INTERRUPT_FLAG = false;
+  Serial.println("HDR Mode");
+  Serial_INTERRUPT_FLAG = false;
 
   hdr.setPhotoTimeExposures();
 
-  Bluetooth.println("Running HDR");
+  Serial.println("Running HDR");
 
   hdr.reset();
 
@@ -438,18 +413,18 @@ void hdrMode() {
   while (!hdr.isDone()) {
     hdr.run();
   }
-  Bluetooth.println("HDR Done");
+  Serial.println("HDR Done");
 }
 
-void readBluetoothString() {
+void readSerialString() {
   // disable timer compare interrupt
-  TIMSK1 |= (0 << OCIE1A);
+  //TIMSK1 &= (0 << OCIE1A);
   String incommingMessage = ""; //clears variable for new input
   char c = ' ';
   while (c != '}') {
     // TODO: Add timeout timer for this
-    if(Bluetooth.available()) {
-      c = Bluetooth.read();  //gets one byte from serial buffer
+    if(Serial.available()) {
+      c = Serial.read();  //gets one byte from serial buffer
       incommingMessage += c; 
 
       if (c == '}') {
@@ -462,13 +437,13 @@ void readBluetoothString() {
 
   if (incommingMessage.length() >0) {
     //Serial.println(incommingMessage); 
-    //Bluetooth.println(incommingMessage); // sends string back to phone for verifiation
+    //Serial.println(incommingMessage); // sends string back to phone for verifiation
 
-    error = deserializeJson(bluetoothRxMessage, incommingMessage);
+    error = deserializeJson(SerialRxMessage, incommingMessage);
 
     if (error) {
-      //Bluetooth.write(F("deserializeJson() failed: "));
-      //Bluetooth.println(error.c_str());
+      //Serial.write(F("deserializeJson() failed: "));
+      //Serial.println(error.c_str());
       return;
     }
   }
@@ -482,16 +457,6 @@ boolean isValidNumber(String str){
   }
    return false;
 } 
-
-void resetTimeout() {
-  Bluetooth.println("Resetting");
-  //asm volatile ("jmp 0");
-  
-  wdt_disable();
-  wdt_enable(WDTO_30MS);
-
-  while(1){;}
-}
 
 void timer2InterruptSetup() {
   TCCR1A = 0;// set entire TCCR1A register to 0
@@ -517,16 +482,18 @@ ISR(TIMER1_COMPA_vect) { //timer1 interrupt 4Hz
   int adcsraHolder = ADCSRA;
   int adcsrbHolder = ADCSRB;
   String output;
-  bluetoothTxMessage["batteryLevel"] = batteryIndicator.getBatteryLevelPercentage();
-  bluetoothTxMessage["batteryStatus"] = batteryIndicator.getBatteryStatus();
+  SerialTxMessage["batteryLevel"] = batteryIndicator.getBatteryLevelPercentage();
+  SerialTxMessage["batteryStatus"] = batteryIndicator.getBatteryStatus();
   //
-  serializeJson(bluetoothTxMessage, output);
-  Bluetooth.println(output);
+  serializeJson(SerialTxMessage, output);
+  Serial.println(output);
 
   ADMUX = admuxHolder;
   ADCSRA = adcsraHolder;
   ADCSRB = adcsrbHolder;
   ADCSRA |= B01000000;  // kick off next ADC
+
+  
 
   
 }
