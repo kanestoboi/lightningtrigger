@@ -1,6 +1,5 @@
 // Include libraries for LCD
 #include <util/delay.h>
-#include <Wire.h>
 
 
 #include <SoftwareSerial.h>// import the serial library
@@ -54,6 +53,7 @@ DeserializationError error;
 // Variables
 int lightningSensitivity = 10;  // Threshold for light to trigger camera
 int soundSensitivity = 10;
+char* currentMode = "";
 
 
 // Various Flags
@@ -81,7 +81,6 @@ void setup() {
 
   char c;
   //Serial.begin(38400);
-  Wire.begin();
   Serial.begin(115200);  // Begin the Serial serial and set data rate
 
   
@@ -118,8 +117,6 @@ void setup() {
   Serial.println("Serial connected");
   sei();
 
-  setSoundSensitivity(0);       // sets default sensitivity 
-  setLightningSensitivity(127); // sets default sensitivity
   
   /**********************************
    * THERE IS A BUG IN THE DISPLAY.BEGIN FUNCTION CAUSING PD4 TO BE SET HIGH
@@ -133,6 +130,7 @@ void setup() {
   timer2InterruptSetup();
 
   pinMode(statusLEDPin, OUTPUT);
+  digitalWrite(statusLEDPin, LOW);
 
 
 }
@@ -142,9 +140,6 @@ void loop() {
 
   if (Serial_INTERRUPT_FLAG) {
     readSerialString();
-    Serial.println("");
-    Serial.println("Serial Message");
-    //interrupts();
     if (error) {
       Serial_INTERRUPT_FLAG = false;
       Serial.println("DeserializationError");
@@ -196,66 +191,56 @@ void loop() {
         }
       }
 
+      currentMode = SerialRxMessage["mode"];
+      sendAsyncInfo();
+
       if (SerialRxMessage["mode"] == "tm") {  // if the run time-lapse command was received from phone
         Serial_INTERRUPT_FLAG = false;
+        digitalWrite(statusLEDPin, HIGH);
         timelapseMode();
       }
       else if (SerialRxMessage["mode"] == "sm") {  // if the run sound mode command was received from phone
         Serial_INTERRUPT_FLAG = false;
+        digitalWrite(statusLEDPin, HIGH);
         soundMode();  
       }
       else if (SerialRxMessage["mode"] == "lm") {  // if the run lightning mode command was received from phone
         Serial_INTERRUPT_FLAG = false;
+        digitalWrite(statusLEDPin, HIGH);
         lightningMode();
       }
       else if (SerialRxMessage["mode"] == "hdr") {  // if the run HDR mode command was received from phone
         Serial_INTERRUPT_FLAG = false;
+        digitalWrite(statusLEDPin, HIGH);
         hdrMode();
       }
       else if (SerialRxMessage["mode"] == "ss") {  // if the run single shot mode command was received from phone
         Serial_INTERRUPT_FLAG = false;
+        digitalWrite(statusLEDPin, HIGH);
         triggerCamera();
         _delay_ms(200);
         releaseCamera();
       }
       else {
         Serial_INTERRUPT_FLAG = false;
-      }   
-    }
-  }
+      }
 
-  //timelapseMode();
-  
-  //lightningMode();  
-  
+      digitalWrite(statusLEDPin, LOW);
+
+      currentMode = "";   
+    }
+  }  
 }
 
 void SerialISR(){
   Serial_INTERRUPT_FLAG = true; // trigger flag indicating a SerialRxMessage was received 
-  //SerialRxMessage = Serial.read();  // read the messgage
-}
-
-void setSoundSensitivity(int val) {
-  Wire.beginTransmission(0x2C); // transmit to device 
-  // device address is specified in datasheet
-  Wire.write(byte(0x00));            // sends instruction byte
-  Wire.write(val);             // sends potentiometer value byte
-  Wire.endTransmission();     // stop transmitting
-}
-
-void setLightningSensitivity(int val) {
-  Wire.beginTransmission(0x2E); // transmit to device 
-  // device address is specified in datasheet
-  Wire.write(byte(0x00));            // sends instruction byte
-  Wire.write(val);             // sends potentiometer value byte
-  Wire.endTransmission();     // stop transmitting
+  digitalWrite(statusLEDPin, HIGH);
 }
 
 void setupSoundMode() {
   thresholdTrigger.setADCInput(1);
   thresholdTrigger.setup();
   thresholdTrigger.reset();
-  
 }
 
 void setupLightningMode() {
@@ -287,21 +272,7 @@ void triggerFlash() {
   PORTD &= ~PORTDFlashTriggerMask;   // reset trigger outputs to off
 }
 
-
-void updateDisplay() {
-//  display.clearDisplay();
-//  display.setCursor(0,20);
-//  display.println(thresholdTrigger.getNumberOfTriggers());
-//  display.display();
-}
-
-void lightningMode() {
-//  display.clearDisplay();
-//  display.display();
-//  display.setCursor(0,0);
-//  display.println("Lightning Trigger Mode");
-//  display.display();
-  
+void lightningMode() {  
   setupLightningMode();
   Serial.println("Lightning Mode");
   Serial_INTERRUPT_FLAG = false; //TODO: need to find out why Serial flag is being triggered from above line
@@ -315,12 +286,6 @@ void lightningMode() {
 
   Serial.println("Calibrated  Lightning Mode");
 
-//  display.clearDisplay();
-//  display.display();
-//  display.setCursor(0,0);
-//  display.println("Lightning Trigger Running");
-//  display.display();
-//  Serial.println("calibration done");
   ADCSRA |= B01000000;
   thresholdTrigger.focusCamera();
   counter = 0;
@@ -335,7 +300,6 @@ void lightningMode() {
     
     if (Serial_INTERRUPT_FLAG) {
       thresholdTrigger.end();
-      //readSerialString();
       Serial.println("Exiting Lightning Mode");
       return;
     }
@@ -346,32 +310,27 @@ void soundMode() {
   setupSoundMode();
   Serial.println("Sound Mode");
 
-  //while(1) {
 
-    thresholdTrigger.resetCalibration();
-    ADCSRA |= B01000000;
-    while(!thresholdTrigger.isCalibrated())
-      thresholdTrigger.calibrateThreshold();
+  thresholdTrigger.resetCalibration();
+  ADCSRA |= B01000000;
+  while(!thresholdTrigger.isCalibrated())
+    thresholdTrigger.calibrateThreshold();
+
+  Serial.println("Waiting for Sound");
+  thresholdTrigger.triggerCamera();
+  delay(1000);
   
-    Serial.println("Waiting for Sound");
-    thresholdTrigger.triggerCamera();
-    delay(1000);
-    
-    Serial_INTERRUPT_FLAG = false;
-    while(!thresholdTrigger.run()) {
-      if (Serial_INTERRUPT_FLAG) {
-        thresholdTrigger.end();
-        Serial.println("Exiting Sound Mode");
-        return;
-                
-      }
+  Serial_INTERRUPT_FLAG = false;
+  while(!thresholdTrigger.run()) {
+    if (Serial_INTERRUPT_FLAG) {
+      thresholdTrigger.end();
+      Serial.println("Exiting Sound Mode");
+      return;
+              
     }
-    thresholdTrigger.end();
-    delay(1000);
-    Serial.println("Sound Triggered");
-
-  //}
-  
+  }
+  thresholdTrigger.end();
+  Serial.println("Sound Triggered");  
 }
 
 void timelapseMode() {
@@ -402,7 +361,6 @@ void timelapseMode() {
     Serial.write("Complete");
   else 
     Serial.write("Exited");
-  
 }
 
 void hdrMode() {
@@ -423,8 +381,6 @@ void hdrMode() {
 }
 
 void readSerialString() {
-  // disable timer compare interrupt
-  //TIMSK1 &= (0 << OCIE1A);
   String incommingMessage = ""; //clears variable for new input
   char c = ' ';
   while (c != '}') {
@@ -434,17 +390,12 @@ void readSerialString() {
       incommingMessage += c; 
 
       if (c == '}') {
-        //Serial.println("Breaking");
         break;
       }  //breaks out of capture loop to print readstring
     } //makes the string readString  
   }
 
-
   if (incommingMessage.length() >0) {
-    //Serial.println(incommingMessage); 
-    //Serial.println(incommingMessage); // sends string back to phone for verifiation
-
     error = deserializeJson(SerialRxMessage, incommingMessage);
 
     if (error) {
@@ -453,16 +404,9 @@ void readSerialString() {
       return;
     }
   }
-}
 
-boolean isValidNumber(String str){
-  for(byte i=0;i<str.length();i++)
-  {
-    if(isDigit(str.charAt(i))) 
-      return true;
-  }
-   return false;
-} 
+  digitalWrite(statusLEDPin, LOW);
+}
 
 void timer2InterruptSetup() {
   TCCR1A = 0;// set entire TCCR1A register to 0
@@ -483,13 +427,17 @@ void timer2InterruptSetup() {
  **********************************/
 ISR(TIMER1_COMPA_vect) { //timer1 interrupt 4Hz 
 
+  sendAsyncInfo();
+}
 
+void sendAsyncInfo() {
   int admuxHolder = ADMUX;
   int adcsraHolder = ADCSRA;
   int adcsrbHolder = ADCSRB;
   String output;
   SerialTxMessage["batteryLevel"] = batteryIndicator.getBatteryLevelPercentage();
   SerialTxMessage["batteryStatus"] = batteryIndicator.getBatteryStatus();
+  SerialTxMessage["currentMode"] = currentMode;
   //
   serializeJson(SerialTxMessage, output);
   Serial.println(output);
@@ -497,9 +445,5 @@ ISR(TIMER1_COMPA_vect) { //timer1 interrupt 4Hz
   ADMUX = admuxHolder;
   ADCSRA = adcsraHolder;
   ADCSRB = adcsrbHolder;
-  ADCSRA |= B01000000;  // kick off next ADC
-
-  
-
-  
+  ADCSRA |= B01000000;  // kick off next ADC 
 }
