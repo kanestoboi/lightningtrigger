@@ -212,6 +212,12 @@ void loop() {
         Serial_INTERRUPT_FLAG = false;
         hdrMode();
       }
+      else if (SerialRxMessage["mode"] == "ss") {  // if the run single shot mode command was received from phone
+        Serial_INTERRUPT_FLAG = false;
+        triggerCamera();
+        _delay_ms(200);
+        releaseCamera();
+      }
       else {
         Serial_INTERRUPT_FLAG = false;
       }   
