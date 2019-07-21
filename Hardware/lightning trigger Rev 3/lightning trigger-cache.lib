@@ -38,24 +38,26 @@ X ~ 2 0 -150 110 U 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
-# Device_Crystal
+# Device_Crystal_GND24_Small
 #
-DEF Device_Crystal Y 0 40 N N 1 F N
-F0 "Y" 0 150 50 H V C CNN
-F1 "Device_Crystal" 0 -150 50 H V C CNN
+DEF Device_Crystal_GND24_Small Y 0 40 Y N 1 F N
+F0 "Y" 50 175 50 H V L CNN
+F1 "Device_Crystal_GND24_Small" 50 100 50 H V L CNN
 F2 "" 0 0 50 H I C CNN
 F3 "" 0 0 50 H I C CNN
 $FPLIST
  Crystal*
 $ENDFPLIST
 DRAW
-S -45 100 45 -100 0 1 12 N
-P 2 0 1 0 -100 0 -75 0 N
-P 2 0 1 20 -75 -50 -75 50 N
-P 2 0 1 20 75 -50 75 50 N
-P 2 0 1 0 100 0 75 0 N
-X 1 1 -150 0 50 R 50 50 1 1 P
-X 2 2 150 0 50 L 50 50 1 1 P
+S -30 -60 30 60 0 1 0 N
+P 2 0 1 15 -50 -30 -50 30 N
+P 2 0 1 15 50 -30 50 30 N
+P 4 0 1 0 -50 -50 -50 -75 50 -75 50 -50 N
+P 4 0 1 0 -50 50 -50 75 50 75 50 50 N
+X 1 1 -100 0 50 R 50 50 1 1 P
+X 2 2 0 -125 50 U 50 50 1 1 P
+X 3 3 100 0 50 L 50 50 1 1 P
+X 4 4 0 125 50 D 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
@@ -401,6 +403,32 @@ X Pin_2 2 -200 -100 150 R 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
+# audio_conn_Conn_01x03
+#
+DEF audio_conn_Conn_01x03 J 0 40 Y N 1 F N
+F0 "J" 0 200 50 H V C CNN
+F1 "audio_conn_Conn_01x03" 0 -200 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ Connector*:*_??x*mm*
+ Connector*:*1x??x*mm*
+ Pin?Header?Straight?1X*
+ Pin?Header?Angled?1X*
+ Socket?Strip?Straight?1X*
+ Socket?Strip?Angled?1X*
+$ENDFPLIST
+DRAW
+S -50 -95 0 -105 1 1 6 N
+S -50 5 0 -5 1 1 6 N
+S -50 105 0 95 1 1 6 N
+S -50 150 50 -150 1 1 10 f
+X Pin_1 1 -200 100 150 R 50 50 1 1 P
+X Pin_2 2 -200 0 150 R 50 50 1 1 P
+X Pin_3 3 -200 -100 150 R 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
 # audio_conn_SJ-2523-SMT
 #
 DEF audio_conn_SJ-2523-SMT J 0 40 Y Y 1 F N
@@ -435,34 +463,6 @@ X VSS 2 -500 -50 200 R 50 50 1 1 w
 X VDD 3 -500 100 200 R 50 50 1 1 W
 X VM 5 400 100 200 L 50 50 1 1 O
 X S2 6 150 -300 200 U 50 50 1 1 O
-ENDDRAW
-ENDDEF
-#
-# conn_Conn_01x04
-#
-DEF conn_Conn_01x04 J 0 40 Y N 1 F N
-F0 "J" 0 200 50 H V C CNN
-F1 "conn_Conn_01x04" 0 -300 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-$FPLIST
- Connector*:*_??x*mm*
- Connector*:*1x??x*mm*
- Pin?Header?Straight?1X*
- Pin?Header?Angled?1X*
- Socket?Strip?Straight?1X*
- Socket?Strip?Angled?1X*
-$ENDFPLIST
-DRAW
-S -50 -195 0 -205 1 1 6 N
-S -50 -95 0 -105 1 1 6 N
-S -50 5 0 -5 1 1 6 N
-S -50 105 0 95 1 1 6 N
-S -50 150 50 -250 1 1 10 f
-X Pin_1 1 -200 100 150 R 50 50 1 1 P
-X Pin_2 2 -200 0 150 R 50 50 1 1 P
-X Pin_3 3 -200 -100 150 R 50 50 1 1 P
-X Pin_4 4 -200 -200 150 R 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
