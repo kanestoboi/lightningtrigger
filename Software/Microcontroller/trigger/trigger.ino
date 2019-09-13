@@ -53,7 +53,7 @@ DeserializationError error;
 // Variables
 int lightningSensitivity = 10;  // Threshold for light to trigger camera
 int soundSensitivity = 10;
-char* currentMode = "";
+const char* currentMode = "";
 
 
 // Various Flags
@@ -111,7 +111,9 @@ void setup() {
         while(Serial.available())
             c = Serial.read();
 
-            */
+*/
+
+            
 
             
   Serial.println("Serial connected");
@@ -217,9 +219,7 @@ void loop() {
       else if (SerialRxMessage["mode"] == "ss") {  // if the run single shot mode command was received from phone
         Serial_INTERRUPT_FLAG = false;
         digitalWrite(statusLEDPin, HIGH);
-        triggerCamera();
-        _delay_ms(200);
-        releaseCamera();
+        singleShotMode();        
       }
       else {
         Serial_INTERRUPT_FLAG = false;
@@ -380,6 +380,35 @@ void hdrMode() {
   Serial.println("HDR Done");
 }
 
+void singleShotMode() {
+
+  if (SerialRxMessage["timed"] == false)
+  {
+    triggerCamera();
+    _delay_ms(200);
+    releaseCamera();
+  }
+  else {
+    //statusLEDDoubleFlash();
+    long startMillis = millis();
+    long timerDelay = SerialRxMessage["delay"];
+    triggerCamera();
+    while((millis() - startMillis) < timerDelay) {
+      if (Serial_INTERRUPT_FLAG) {
+        readSerialString();
+        if (SerialRxMessage["flag"] == "err") {  // if the eit time-lapse command was received from phone
+          Serial_INTERRUPT_FLAG = false;
+          break;
+        }
+        Serial_INTERRUPT_FLAG = false; // reset interrupt flag
+      }
+    }
+    releaseCamera();
+  }
+  
+
+}
+
 void readSerialString() {
   String incommingMessage = ""; //clears variable for new input
   char c = ' ';
@@ -446,4 +475,15 @@ void sendAsyncInfo() {
   ADCSRA = adcsraHolder;
   ADCSRB = adcsrbHolder;
   ADCSRA |= B01000000;  // kick off next ADC 
+}
+
+void statusLEDDoubleFlash() {
+  digitalWrite(statusLEDPin, HIGH);
+  _delay_ms(300);
+  digitalWrite(statusLEDPin, LOW);
+  _delay_ms(300);
+  digitalWrite(statusLEDPin, HIGH);
+  _delay_ms(300);
+  digitalWrite(statusLEDPin, LOW);
+
 }
