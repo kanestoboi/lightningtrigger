@@ -17,6 +17,7 @@ void releaseCamera();
 void triggerFlash();
 
 volatile bool Serial_INTERRUPT_FLAG = false;
+volatile bool BT_SEND_FLAG = false;
 
 /*********************************
  * DEVELOPMENT SETUP
@@ -343,9 +344,20 @@ void timelapseMode() {
   timelapse.setTotalPhotos(SerialRxMessage["photos"]);
   timelapse.setDelayBetweenShots(SerialRxMessage["delay"]);
   
+  int lastPhotoTaken = -1;
   
   while (!timelapse.isDone()) {
     timelapse.run();
+
+    if (lastPhotoTaken < timelapse.getPhotosTaken()) {
+      SerialTxMessage["photosTaken"] = timelapse.getPhotosTaken();
+      SerialTxMessage["totalPhotos"] = timelapse.getTotalPhotos();
+      lastPhotoTaken = timelapse.getPhotosTaken();
+      while (BT_SEND_FLAG);
+      sendAsyncInfo();
+    }
+
+
     if (Serial_INTERRUPT_FLAG) {
       readSerialString();
       if (SerialRxMessage["flag"] == "err") {  // if the eit time-lapse command was received from phone
@@ -357,10 +369,15 @@ void timelapseMode() {
     }
   }
   
-  if (timelapse.isDone())
-    Serial.write("Complete");
+  if (timelapse.isDone()) {
+    while (BT_SEND_FLAG); // wait until previous BT message has been sent
+    sendAsyncInfo();
+  }
   else 
     Serial.write("Exited");
+
+  SerialTxMessage.remove("photosTaken");
+  SerialTxMessage.remove("totalPhotos");
 }
 
 void hdrMode() {
@@ -460,6 +477,10 @@ ISR(TIMER1_COMPA_vect) { //timer1 interrupt 4Hz
 }
 
 void sendAsyncInfo() {
+
+  if (BT_SEND_FLAG)
+    return;
+
   int admuxHolder = ADMUX;
   int adcsraHolder = ADCSRA;
   int adcsrbHolder = ADCSRB;
@@ -467,9 +488,13 @@ void sendAsyncInfo() {
   SerialTxMessage["batteryLevel"] = batteryIndicator.getBatteryLevelPercentage();
   SerialTxMessage["batteryStatus"] = batteryIndicator.getBatteryStatus();
   SerialTxMessage["currentMode"] = currentMode;
+
   //
   serializeJson(SerialTxMessage, output);
+
+  BT_SEND_FLAG = true;
   Serial.println(output);
+  BT_SEND_FLAG = false;
 
   ADMUX = admuxHolder;
   ADCSRA = adcsraHolder;
