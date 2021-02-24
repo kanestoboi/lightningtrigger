@@ -17,6 +17,6 @@ Power is from a li-po battery and is charged using an onboard li-po charger.
 
 Images are located in the [Images](https://github.com/kanestoboi/lightningtrigger/tree/master/Images) directory.
 
-![Trigger with Camera](https://github.com/kanestoboi/lightningtrigger/blob/master/Images/Trigger%20on%20Camera.jpg =498x368) 
+![Trigger with Camera](https://github.com/kanestoboi/lightningtrigger/blob/master/Images/Trigger%20on%20Camera.jpg) 
 
 
